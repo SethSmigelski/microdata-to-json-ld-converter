@@ -95,10 +95,11 @@ Use the Microdata to JSON-LD Converter in 5 easy steps.
 
 ## Screenshots
 
-1.  The clean, tabbed settings page for Microdata to JSON-LD Converter showing the modern toggle switches for the main options.
-2.  The "Bulk Rebuild Tools" tab, showing the post type selection and progress bar.
-3.  The meta box in the post editor, showing the generated JSON-LD.
-4.  The meta box’s validation results after clicking the "Validate" button.
+![1.  The clean, tabbed settings page for Microdata to JSON-LD Converter showing the modern toggle switches for the main options.](http://plugins.svn.wordpress.org/microdata-to-json-ld-converter/assets/screenshot-1.png)
+![2.  The "Bulk Rebuild Tools" tab, showing the post type selection and progress bar.](http://plugins.svn.wordpress.org/microdata-to-json-ld-converter/assets/screenshot-2.png)
+![3.  The meta box in the post editor, showing the generated JSON-LD.](http://plugins.svn.wordpress.org/microdata-to-json-ld-converter/assets/screenshot-3.png)
+![4.  The meta box’s validation results after clicking the "Validate" button.](http://plugins.svn.wordpress.org/microdata-to-json-ld-converter/assets/screenshot-4.png)
+
 
 ---
 
