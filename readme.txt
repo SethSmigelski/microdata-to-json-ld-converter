@@ -3,7 +3,7 @@ Contributors: sethsm
 Tags: schema.org, Microdata, json-ld, seo, structured data
 Requires at least: 5.5
 Tested up to: 6.8
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -98,8 +98,8 @@ Note: To ensure that the inline Microdata does not serve as a duplicate of the n
 
 == Changelog ==
 
-= 1.6.1 = 
-* **Fix:** Pushing update from GitHub.
+= 1.6.2 = 
+* **Fix:** Added package.json file in GitHub for WordPress.org Plugin Deploy Action.
 
 = 1.6 = 
 * **Fix:** Resolved an unintended consequence of the previous update in which attributes with content of "0" was voided. Implemented a smarter parsing logic.
