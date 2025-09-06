@@ -104,8 +104,8 @@ Use the Microdata to JSON-LD Converter in 5 easy steps.
 
 ## Changelog
 
-### 1.6.1
-* **Fix:** Pushing update from GitHub.
+### 1.6.2
+* **Fix:** Added package.json file in GitHub for WordPress.org Plugin Deploy Action.
 
 ### 1.6
 * **Fix:** Resolved an unintended consequence of the previous update in which attributes with content of "0" was voided. Implemented a smarter parsing logic.
