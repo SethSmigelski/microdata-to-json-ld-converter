@@ -1,6 +1,8 @@
 # Microdata to JSON-LD Converter
 A WordPress plugin to convert existing Schema.org Microdata into the preferred JSON-LD format, clean up your HTML, and maintain structured data.
 
+![Microdata to JSON-LD Converter WordPress Plugin Icon](http://plugins.svn.wordpress.org/microdata-to-json-ld-converter/assets/icon-256x256.png)
+
 * **Contributors:** sethsm
 * **Tags:** schema.org, Microdata, json-ld, seo, structured data
 * **Requires at least:** 5.5
@@ -41,7 +43,6 @@ This plugin offers a seamless migration path for modernizing your site’s SEO a
 ---
 
 ![Microdata to JSON-LD Converter WordPress Plugin Banner](http://plugins.svn.wordpress.org/microdata-to-json-ld-converter/assets/banner-1544x500.png)
-
 
 ## Installation
 
