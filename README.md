@@ -5,7 +5,7 @@ A WordPress plugin to convert existing Schema.org Microdata into the preferred J
 * **Tags:** schema.org, Microdata, json-ld, seo, structured data
 * **Requires at least:** 5.5
 * **Tested up to:** 6.8
-* **Stable tag:** 1.6
+* **Stable tag:** 1.6.1
 * **Requires PHP:** 7.2
 * **License:** GPLv2 or later
 * **License URI:** https://www.gnu.org/licenses/gpl-2.0.html
@@ -103,6 +103,9 @@ Use the Microdata to JSON-LD Converter in 5 easy steps.
 ---
 
 ## Changelog
+
+### 1.6.1
+* **Fix:** Pushing update from GitHub.
 
 ### 1.6
 * **Fix:** Resolved an unintended consequence of the previous update in which attributes with content of "0" was voided. Implemented a smarter parsing logic.
