@@ -1,7 +1,7 @@
 # Microdata to JSON-LD Converter
 A WordPress plugin to convert existing Schema.org Microdata into the preferred JSON-LD format, clean up your HTML, and maintain structured data.
 
-![Microdata to JSON-LD Converter WordPress Plugin Icon](http://plugins.svn.wordpress.org/microdata-to-json-ld-converter/assets/icon-256x256.png)
+![Microdata to JSON-LD Converter WordPress Plugin Icon](https://ps.w.org/microdata-to-json-ld-converter/assets/icon-256x256.png)
 
 * **Contributors:** sethsm
 * **Tags:** schema.org, Microdata, json-ld, seo, structured data
@@ -42,7 +42,7 @@ This plugin offers a seamless migration path for modernizing your site’s SEO a
 
 ---
 
-![Microdata to JSON-LD Converter WordPress Plugin Banner](http://plugins.svn.wordpress.org/microdata-to-json-ld-converter/assets/banner-1544x500.png)
+![Microdata to JSON-LD Converter WordPress Plugin Banner](https://ps.w.org/microdata-to-json-ld-converter/assets/banner-1544x500.png)
 
 ## Installation
 
@@ -108,16 +108,16 @@ Use the Microdata to JSON-LD Converter in 5 easy steps.
 
 ## Screenshots
 
-![Microdata to JSON-LD Converter WordPress Plugin Settings Page](http://plugins.svn.wordpress.org/microdata-to-json-ld-converter/assets/screenshot-1.png)
+![Microdata to JSON-LD Converter WordPress Plugin Settings Page](https://ps.w.org/microdata-to-json-ld-converter/assets/screenshot-1.png)
 The clean, tabbed settings page for Microdata to JSON-LD Converter showing the modern toggle switches for the main options.
 
-![Microdata to JSON-LD Converter WordPress Plugin Bulk Rebuild Tools and progress bar.](http://plugins.svn.wordpress.org/microdata-to-json-ld-converter/assets/screenshot-2.png)
+![Microdata to JSON-LD Converter WordPress Plugin Bulk Rebuild Tools and progress bar.](https://ps.w.org/microdata-to-json-ld-converter/assets/screenshot-2.png)
 The "Bulk Rebuild Tools" tab, showing the post type selection and progress bar.
 
-![Microdata to JSON-LD Converter WordPress Plugin generated JSON-LD in post editor meta box](http://plugins.svn.wordpress.org/microdata-to-json-ld-converter/assets/screenshot-3.png)
+![Microdata to JSON-LD Converter WordPress Plugin generated JSON-LD in post editor meta box](https://ps.w.org/microdata-to-json-ld-converter/assets/screenshot-3.png)
 The meta box in the post editor, showing the generated JSON-LD.
 
-![Microdata to JSON-LD Converter WordPress Plugin validation results](http://plugins.svn.wordpress.org/microdata-to-json-ld-converter/assets/screenshot-4.png)
+![Microdata to JSON-LD Converter WordPress Plugin validation results](https://ps.w.org/microdata-to-json-ld-converter/assets/screenshot-4.png)
 The meta box’s validation results after clicking the "Validate" button.
 
 ---
