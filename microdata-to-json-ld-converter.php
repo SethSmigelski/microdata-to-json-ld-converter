@@ -3,7 +3,7 @@
  * Plugin Name: Microdata to JSON-LD Converter
  * Plugin URI:  https://www.sethcreates.com/plugins-for-wordpress/microdata-to-json-ld-converter/
  * Description: Converts Microdata to JSON-LD, validates it against best practices, and optionally removes the original markup. Includes a bulk rebuild tool.
- * Version:     1.6
+ * Version:     1.6.5
  * Author:      Seth Smigelski
  * Author URI:  https://www.sethcreates.com/plugins-for-wordpress/
  * License:     GPL-2.0+
