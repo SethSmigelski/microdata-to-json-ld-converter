@@ -3,7 +3,7 @@ Contributors: sethsm
 Tags: schema.org, Microdata, json-ld, seo, structured data
 Requires at least: 5.5
 Tested up to: 6.8
-Stable tag: 1.6.4
+Stable tag: 1.6.5
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -97,6 +97,10 @@ Note: To ensure that the inline Microdata does not serve as a duplicate of the n
 4.  The meta box's validation results after clicking the "Validate" button.
 
 == Changelog ==
+
+= 1.6.5 = 
+* **Improvement:** Replaced deprecated mb_convert_encoding for handling character sets for HTML parsing. 
+
 = 1.6.4 = 
 * **Fix:** Added handling of the "itemid" microdata attribute to convert to "@id" schema
 
