@@ -281,6 +281,10 @@ class Microdata_To_JSON_LD_Converter {
 	public function output_json_ld() { if ( is_singular() && get_option( 'mdtj_create_json' ) ) { $post_id = get_queried_object_id(); $json_ld_string = get_post_meta( $post_id, '_mdtj_json_ld', true ); if ( ! empty( $json_ld_string ) ) { $json_ld_data = json_decode( $json_ld_string, true ); if ( json_last_error() === JSON_ERROR_NONE ) { if ( ! isset( $json_ld_data['@context'] ) ) { $json_ld_data = array('@context' => 'https://schema.org') + $json_ld_data; } echo '<script type="application/ld+json">' . wp_json_encode($json_ld_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n"; } } } }
 	private function parse_item( $element ) {
 		$item = array('@type' => preg_replace( '#https?://schema.org/?#', '', $element->getAttribute( 'itemtype' )));
+		// Check for an itemid attribute and add it as @id if it exists.
+		if ( $element->hasAttribute( 'itemid' ) ) {
+			$item['@id'] = $element->getAttribute( 'itemid' );
+		}
 		$properties = $this->get_child_properties( $element );
 		foreach ( $properties as $prop_element ) {
 			$prop_names_string = $prop_element->getAttribute( 'itemprop' );
