@@ -1,7 +1,7 @@
 <?php
 /**
  * Main plugin class.
- * @version 1.6
+ * @version 1.6.5
  *
  * v1.6 - Resolved an unintended consequence of the previous update in which attributes with content of "0" was voided. Implemented a smarter parsing logic.
  * v1.5.6 - corrected logic for to address Object vs. Array Confusion with some attributes.
