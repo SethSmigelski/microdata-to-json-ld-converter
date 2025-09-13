@@ -329,7 +329,26 @@ class Microdata_To_JSON_LD_Converter {
 		echo '</div>'; 
 		echo '<div id="mdtj-validation-results" style="display:none; padding: 10px; border: 1px solid #ccc; margin-top: 10px; background-color: #fafafa; font-family: monospace; font-size: 12px;"></div>'; 
 	}
-	public function generate_json_from_html( $html ) { if ( ! class_exists( 'DOMDocument' ) ) return array(); libxml_use_internal_errors(true); $dom = new DOMDocument(); $dom->loadHTML( mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOWARNING | LIBXML_NOERROR ); libxml_clear_errors(); $xpath = new DOMXPath( $dom ); $items = array(); $item_nodes = $xpath->query( '//*[@itemscope and not(@itemprop)]' ); foreach ( $item_nodes as $item_node ) $items[] = $this->parse_item( $item_node ); if(empty($items)) return array(); if(count($items) === 1) return array_merge(array('@context' => 'https://schema.org'), $items[0]); return array('@context' => 'https://schema.org', '@graph' => $items); }
+	public function generate_json_from_html( $html ) {
+		if ( ! class_exists( 'DOMDocument' ) ) return array();
+		libxml_use_internal_errors(true);
+		$dom = new DOMDocument();
+	
+		// --- CORRECTED LINE ---
+		// Prepend the XML encoding declaration to ensure proper UTF-8 handling.
+		$dom->loadHTML( '<?xml encoding="utf-8" ?>' . $html, LIBXML_NOWARNING | LIBXML_NOERROR );
+	
+		libxml_clear_errors();
+		$xpath = new DOMXPath( $dom );
+		$items = array();
+		$item_nodes = $xpath->query( '//*[@itemscope and not(@itemprop)]' );
+		foreach ( $item_nodes as $item_node ) {
+			$items[] = $this->parse_item( $item_node );
+		}
+		if(empty($items)) return array();
+		if(count($items) === 1) return array_merge(array('@context' => 'https://schema.org'), $items[0]);
+		return array('@context' => 'https://schema.org', '@graph' => $items);
+	}
 	private function get_child_properties( $element ) { $properties = array(); $queue = new SplQueue(); foreach ($element->childNodes as $child) $queue->enqueue($child); while (!$queue->isEmpty()) { $node = $queue->dequeue(); if ($node instanceof DOMElement) { if ($node->hasAttribute('itemprop')) $properties[] = $node; if (!$node->hasAttribute('itemscope')) { foreach ($node->childNodes as $child) $queue->enqueue($child); } } } return $properties; }
 	private function get_property_value( $element ) { if ( $element->hasAttribute( 'itemscope' ) ) return $this->parse_item( $element ); $tag = strtoupper( $element->tagName ); if ( in_array($tag, array('A', 'LINK')) ) return $element->getAttribute( 'href' ); if ( in_array($tag, array('IMG', 'VIDEO', 'AUDIO', 'SOURCE')) ) return $element->getAttribute( 'src' ); if ( $tag == 'META' ) return $element->getAttribute( 'content' ); if ( $tag == 'TIME' ) return $element->getAttribute( 'datetime' ); if ( in_array($tag, array('DATA', 'INPUT')) ) return $element->getAttribute( 'value' ); return trim($element->textContent); }
 	public function render_bulk_rebuild_section_text() { echo '<p>' . esc_html__( 'Use this tool to generate JSON-LD for all published items of the selected post types.', 'microdata-to-json-ld-converter' ) . '</p>'; }
