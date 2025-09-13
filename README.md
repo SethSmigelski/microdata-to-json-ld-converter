@@ -124,6 +124,9 @@ The meta box’s validation results after clicking the "Validate" button.
 
 ## Changelog
 
+### 1.6.4
+* **Fix:** Added handling of the "itemid" microdata attribute to convert to "@id" schema
+  
 ### 1.6.3
 * **Fix:** Added package.json file and simplified deploy.yml file in GitHub for WordPress.org Plugin Deploy Action.
 
