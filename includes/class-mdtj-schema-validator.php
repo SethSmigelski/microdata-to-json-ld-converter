@@ -1,7 +1,7 @@
 <?php
 /**
  * Schema.org Validator Class
- * @version 1.6.5
+ * @version 1.6.6
  */
 class MDTJ_Schema_Validator {
 
@@ -92,7 +92,7 @@ class MDTJ_Schema_Validator {
         $rule_set = $this->rules[$type]['recommended'] ?? [];
         foreach ($rule_set as $prop) {
             if (empty($item[$prop])) {
-                $this->add_result('suggestion', "The '{$prop}' property is recommended for a '{$type}' but is missing.");
+				$this->add_result('suggestion', sprintf("The '%s' property is recommended for a '%s' but is missing.", esc_html($prop), esc_html($type)));
             }
         }
         // Special case: check for priceCurrency if price is set
@@ -109,11 +109,12 @@ class MDTJ_Schema_Validator {
                 $values_to_check = isset($prop_value[0]) ? $prop_value : [$prop_value];
                 foreach($values_to_check as $value) {
                     if (is_string($value) && !in_array('URL', $expected_types)) {
-                        $this->add_result('warning', "The '{$prop}' property should be a structured object (e.g., a '{$expected_types[0]}') but it's a plain text string.");
+						$this->add_result('warning', sprintf("The '%s' property should be a structured object (e.g., a '%s') but it's a plain text string.", esc_html($prop), esc_html($expected_types[0])));
+						
                     } elseif (is_array($value) && !empty($value['@type'])) {
                         $actual_type = is_array($value['@type']) ? $value['@type'][0] : $value['@type'];
                         if (!in_array($actual_type, $expected_types)) {
-                           $this->add_result('warning', "The '{$prop}' property has a type of '{$actual_type}', but one of " . implode(', ', $expected_types) . " is expected.");
+                           $this->add_result('warning', sprintf("The '%s' property has a type of '%s', but one of %s is expected.", esc_html($prop), esc_html($actual_type), esc_html(implode(', ', $expected_types))));
                         }
                     }
                 }
@@ -122,6 +123,9 @@ class MDTJ_Schema_Validator {
     }
 
     private function add_result($level, $message) {
-        $this->results[] = ['level' => $level, 'message' => $message];
-    }
+		$this->results[] = [
+			'level' => sanitize_text_field($level), 
+			'message' => wp_kses_post($message)
+		];
+	}
 }
