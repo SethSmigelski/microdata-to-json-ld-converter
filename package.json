@@ -1,6 +1,6 @@
 {
   "name": "microdata-to-json-ld-converter",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "description": "A powerful tool to convert your existing Schema.org Microdata into the preferred JSON-LD format, clean up your HTML, and maintain structured data.",
   "private": true
 }
