@@ -1,8 +1,11 @@
 <?php
 /**
  * Main plugin class.
- * @version 1.6.5
+ * @version 1.6.6
  *
+ * v1.6.6 - Improved input handling and enhanced security against parameter manipulation attacks.  Direct $_GET parameter access now properly uses wp_unslash() before sanitization. JSON-LD schema output now used separated script tag construction and includes security annotations for safe content.
+ * v1.6.5 - Replaced deprecated mb_convert_encoding for handling character sets for HTML parsing.
+ * v1.6.4 - Added handling of the "itemid" microdata attribute to convert to "@id" schema
  * v1.6 - Resolved an unintended consequence of the previous update in which attributes with content of "0" was voided. Implemented a smarter parsing logic.
  * v1.5.6 - corrected logic for to address Object vs. Array Confusion with some attributes.
  * v1.5.5 - Added a warning message for the "Remove Inline Microdata from HTML" setting.
