@@ -54,7 +54,7 @@ class Microdata_To_JSON_LD_Converter {
 	}
 
 	public function start_buffer() {
-		$mdtj_preview = isset( $_GET['mdtj_preview'] ) ? sanitize_key( $_GET['mdtj_preview'] ) : '';
+		$mdtj_preview = isset( $_GET['mdtj_preview'] ) ? sanitize_key( wp_unslash( $_GET['mdtj_preview'] ) ) : '';
 
 		if ( is_singular() && get_option('mdtj_remove_microdata') && 'true' !== $mdtj_preview ) {
 			ob_start(array($this, 'process_html_buffer'));
@@ -169,7 +169,7 @@ class Microdata_To_JSON_LD_Converter {
 			$html .= '<ul>';
 			foreach ($results as $result) {
 				$color = $result['level'] === 'warning' ? 'orange' : 'blue';
-				$html .= "<li><strong style='color:{$color};'>" . ucfirst($result['level']) . ":</strong> " . esc_html($result['message']) . "</li>";
+				$html .= "<li><strong style='color:" . esc_attr($color) . ";'>" . esc_html(ucfirst($result['level'])) . ":</strong> " . esc_html($result['message']) . "</li>";
 			}
 			$html .= '</ul>';
 		}
@@ -278,7 +278,22 @@ class Microdata_To_JSON_LD_Converter {
         return $buffer;
     }
 
-	public function output_json_ld() { if ( is_singular() && get_option( 'mdtj_create_json' ) ) { $post_id = get_queried_object_id(); $json_ld_string = get_post_meta( $post_id, '_mdtj_json_ld', true ); if ( ! empty( $json_ld_string ) ) { $json_ld_data = json_decode( $json_ld_string, true ); if ( json_last_error() === JSON_ERROR_NONE ) { if ( ! isset( $json_ld_data['@context'] ) ) { $json_ld_data = array('@context' => 'https://schema.org') + $json_ld_data; } echo '<script type="application/ld+json">' . wp_json_encode($json_ld_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n"; } } } }
+	public function output_json_ld() { 
+		if ( is_singular() && get_option( 'mdtj_create_json' ) ) { 
+			$post_id = get_queried_object_id(); 
+			$json_ld_string = get_post_meta( $post_id, '_mdtj_json_ld', true ); 
+			if ( ! empty( $json_ld_string ) ) { 
+				$json_ld_data = json_decode( $json_ld_string, true ); 
+				if ( json_last_error() === JSON_ERROR_NONE ) { if ( ! isset( $json_ld_data['@context'] ) ) { 
+					$json_ld_data = array('@context' => 'https://schema.org') + $json_ld_data; } 
+					echo '<script type="application/ld+json">';
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo wp_json_encode($json_ld_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+					echo '</script>' . "\n";
+				} 
+			} 
+		} 
+	}
 	private function parse_item( $element ) {
 		$item = array('@type' => preg_replace( '#https?://schema.org/?#', '', $element->getAttribute( 'itemtype' )));
 		// Check for an itemid attribute and add it as @id if it exists.
