@@ -124,99 +124,109 @@ The meta box’s validation results after clicking the "Validate" button.
 
 ## Changelog
 
+### 1.6.6
+* **SECURITY:** Improved Input handling and enhanced protection against parameter manipulation attacks.
+* **ENHANCEMENT:** More granular escaping of HTML attributes and content in admin interfaces
+* **FIX:** Direct $_GET parameter access now properly uses wp_unslash() before sanitization.
+* **FIX:** JSON-LD schema output now includes security annotations for safe content
+* **IMPROVEMENT:** Script tag construction separated from JSON content for better security clarity
+* **SECURITY:** In the JSON Validator, implemented sprintf() for safer use of escaped variables and improved security against any potential XSS in dynamic messages.
+
 ### 1.6.5
-* **Improvement:** Replaced deprecated mb_convert_encoding for handling character sets for HTML parsing. 
+* **IMPROVEMENT:** Replaced deprecated mb_convert_encoding for handling character sets for HTML parsing. 
 
 ### 1.6.4
-* **Fix:** Added handling of the "itemid" microdata attribute to convert to "@id" schema
-  
-### 1.6.3
-* **Fix:** Added package.json file and simplified deploy.yml file in GitHub for WordPress.org Plugin Deploy Action.
+* **NEW:** Added handling of the "itemid" microdata attribute to convert to "@id" schema
 
-### 1.6
-* **Fix:** Resolved an unintended consequence of the previous update in which attributes with content of "0" was voided. Implemented a smarter parsing logic.
+### 1.6.3 
+* **FIX:** Added package.json file and simplified deploy.yml file in GitHub for WordPress.org Plugin Deploy Action.
 
-### 1.5.6
-* **Fix:** Corrected logic for to address Object vs. Array Confusion with some attributes
+### 1.6 
+* **FIX:** Resolved an unintended consequence of the previous update in which attributes with content of "0" was voided. Implemented a smarter parsing logic.
 
-### 1.5.5 
-* **Improvement:** Added a settings page warning message for the "Remove Inline Microdata from HTML" option. The warning message, along with an added readme FAQ question, describes how this option may conflict with server-side caching systems. Users, especially those with managed hosting and advanced caching, are advised to test this feature carefully to ensure there are no conflicts. The recommendation is for users to keep this feature disabled if it creates caching issues.
+### 1.5.6 
+* **FIX:** Corrected logic for to address Object vs. Array Confusion with some attributes
+
+### 1.5.5
+* **IMPROVEMENT:** Added a settings page warning message for the "Remove Inline Microdata from HTML" option. The warning message, along with an added readme FAQ question, describes how this option may conflict with server-side caching systems. Users, especially those with managed hosting and advanced caching, are advised to test this feature carefully to ensure there are no conflicts. The recommendation is for users to keep this feature disabled if it creates caching issues.
 
 ### 1.5.4 
-* **Security:** Performed a Security and WordPress Standards Update. Refactored to use admin_enqueue_scripts for all CSS/JS. Added sanitization for nonce verification. Implemented recursive sanitization for all incoming JSON data.
+* **SECURITY:** Performed a Security and WordPress Standards Update. Refactored to use admin_enqueue_scripts for all CSS/JS. Added sanitization for nonce verification. Implemented recursive sanitization for all incoming JSON data.
 
 ### 1.5.3
-* **Fix:** Fixed a bug where the scheduler would not process Media (attachments) due to incorrect post_status.
+* **FIX:** Corrected a bug where the scheduler would not process media (attachments) due to incorrect post_status.
 
-### 1.5.2
-* **Improvement:** Added a log to display the results of the last completed scheduled rebuild.
+### 1.5.2 
+* **IMPROVEMENT:** Added a log to display the results of the last completed scheduled rebuild.
 
-### 1.5.1 
-* **Improvement:** Scheduler status provides better feedback to prevent "false negatives" on save.
+### 1.5.1
+* **IMPROVEMENT:** Scheduler status provides better feedback to prevent "false negatives" on save.
 
 ### 1.5.0 
-* **Improvement:** Added a WP-Cron-based scheduler for automatic background rebuilding of JSON-LD to better handle dynamic content.
+* **NEW:** Added a WP-Cron-based scheduler for automatic background rebuilding of JSON-LD to better handle dynamic content.
 
 ### 1.4.8 
-* **Improvement:** Modified process_html_buffer() to completely remove meta tags containing itemprop attributes.
+* **IMPROVEMENT:** Modified process_html_buffer() to completely remove meta tags containing itemprop attributes.
 
 ### 1.4.7
-* **Security:** Updated Direct Nonce Verification in the save_post_meta. Added explanatory comments for the warnings about sanitizing $_POST variables in the AJAX functions
+* **SECURITY:** Updated Direct Nonce Verification in the save_post_meta. Added explanatory comments for the warnings about sanitizing $_POST variables in the AJAX functions
 
 ### 1.4.6
-* **Security:** Updated Sanitization Flow to address InputNotSanitized security warnings and added explanatory comments to start_buffer explaining why sanitize_key() is the appropriate and secure method for this specific, low-risk check.
+* **SECURITY:** Updated Sanitization Flow to address InputNotSanitized security warnings and added explanatory comments to start_buffer explaining why sanitize_key() is the appropriate and secure method for this specific, low-risk check.
 
 ### 1.4.5
-* **Security:** Made additional security updates via Explicit Nonce Escaping and Sanitization Best Practices
+* **SECURITY:** Made additional security updates via Explicit Nonce Escaping and Sanitization Best Practices
 
 ### 1.4.4
-* **Security:** Applied Nonce Escaping, Nonce Verification, and Input Sanitization for best-practice fixes and security hardening
+* **SECURITY:** Applied Nonce Escaping, Nonce Verification, and Input Sanitization for best-practice fixes and security hardening
 
 ### 1.4.3
-* **Fix:**  Addressed text domain declaration issue within plugin files, changing the text domain inside the code from 'mdtj' to 'microdata-to-json-ld-converter'.
+* **FIX:** Addressed text domain declaration issue within plugin files, changing the text domain inside the code from 'mdtj' to 'microdata-to-json-ld-converter'.
 
-= 1.4.2 =
-* **Fix:** Add query parameter to URLs when the plugin fetches pages for regeneration, avoiding a recursive problem discovered while fetching Microdata when "Remove Inline Microdata" is active.
+### 1.4.2
+* **FIX:** Add query parameter to URLs when the plugin fetches pages for regeneration, avoiding a recursive problem discovered while fetching Microdata when "Remove Inline Microdata" is active.
 
 ### 1.4.1
-* **Improvement:** Refined the settings page UI with clearer descriptions for each option and a more intuitive title for the auto-update feature.
+* **IMPROVEMENT:** Refined the settings page UI with clearer descriptions for each option and a more intuitive title for the auto-update feature.
 
 ### 1.4.0
-* **Feature:** Redesigned the settings page with a modern, tabbed UI and interactive toggle switches.
-* **Feature:** Significantly expanded the built-in schema validator to include rules for Event, FAQPage, VideoObject, and more detailed checks for Offer properties.
+* **FEATURE:** Redesigned the settings page with a modern, tabbed UI and interactive toggle switches.
+* **FEATURE:** Significantly expanded the built-in schema validator to include rules for Event, FAQPage, VideoObject, and more detailed checks for Offer properties.
 
 ### 1.3.5
-* **Fix:** The "Remove Inline Microdata" function now correctly strips leftover standalone `itemscope` attributes for cleaner HTML output.
+* **FIX:** The "Remove Inline Microdata" function now correctly strips leftover standalone `itemscope` attributes for cleaner HTML output.
 
 ### 1.3.4
-* **Feature:** Added a new "Keep JSON-LD up to date" option to automatically regenerate the JSON-LD every time a post is saved.
+* **FEATURE:** Added a new "Keep JSON-LD up to date" option to automatically regenerate the JSON-LD every time a post is saved.
 
 ### 1.3.3
-* **Feature:** The JSON-LD is now automatically generated the first time a user opens the editor for a published post if the field is empty. Improves workflow.
+* **FEATURE:** The JSON-LD is now automatically generated the first time a user opens the editor for a published post if the field is empty. Improves workflow.
 
 ### 1.3.2
-* **Fix:** Corrected a double-encoding issue with special characters. Unicode characters like `→` and `·` are now saved correctly to the database and render properly in the final front-end script.
+* **FIX:** Corrected a double-encoding issue with special characters. Unicode characters like `→` and `·` are now saved correctly to the database and render properly in the final front-end script.
 
 ### 1.3.1
-* **Fix:** The parser now correctly handles space-separated `itemprop` attributes (e.g., `itemprop="caption description"`) by splitting them into two distinct properties.
-* **Fix:** Final JSON-LD script now uses `JSON_UNESCAPED_UNICODE` to ensure special characters display correctly in all validators.
+* **FIX:** The parser now correctly handles space-separated `itemprop` attributes (e.g., `itemprop="caption description"`) by splitting them into two distinct properties.
+* **FIX:** Final JSON-LD script now uses `JSON_UNESCAPED_UNICODE` to ensure special characters display correctly in all validators.
 
 ### 1.3.0
-* **Feature:** Added a "Validate" button to the meta box for on-demand checks against schema best practices.
-* **Feature:** Added a "Test on Google" button to the meta box for easy one-click validation in the Rich Results Test.
-* **Refactor:** Moved main plugin class and new validator class into an `/includes` directory for better organization.
+* **FEATURE:** Added a "Validate" button to the meta box for on-demand checks against schema best practices.
+* **FEATURE:** Added a "Test on Google" button to the meta box for easy one-click validation in the Rich Results Test.
+* **REFACTOR:** Moved main plugin class and new validator class into an `/includes` directory for better organization.
 
 ### 1.2.0
-* **Feature:** Implemented a Bulk Rebuild tool on the settings page with a progress bar to process all posts.
-* **Improvement:** The regeneration process now fetches the full, live HTML of a page, ensuring Microdata from theme files is parsed.
+* **FEATURE:** Implemented a Bulk Rebuild tool on the settings page with a progress bar to process all posts.
+* **IMPROVEMENT:** The regeneration process now fetches the full, live HTML of a page, ensuring Microdata from theme files is parsed.
 
 ### 1.1.0
-* **Improvement:** The "Remove Microdata" option now uses an output buffer to process the entire page, not just `the_content`, for more comprehensive removal.
-* **Improvement:** Added JSON validation and pretty-printing when saving data from the meta box.
-* **Fix:** Ensured `@context` is always present in the generated JSON-LD.
+* **IMPROVEMENT:** The "Remove Microdata" option now uses an output buffer to process the entire page, not just `the_content`, for more comprehensive removal.
+* **IMPROVEMENT:** Added JSON validation and pretty-printing when saving data from the meta box.
+* **FIX:** Ensured `@context` is always present in the generated JSON-LD.
 
 ### 1.0.0
 * Initial release.
+
+---
 
 ## Upgrade Notice
 
