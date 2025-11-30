@@ -7,7 +7,7 @@ A WordPress plugin to convert existing Schema.org Microdata into the preferred J
 * **Tags:** schema.org, Microdata, json-ld, seo, structured data
 * **Requires at least:** 5.5
 * **Tested up to:** 6.8
-* **Stable tag:** 1.6.5
+* **Stable tag:** 1.7
 * **Requires PHP:** 7.2
 * **License:** GPLv2 or later
 * **License URI:** https://www.gnu.org/licenses/gpl-2.0.html
@@ -123,6 +123,9 @@ The meta box’s validation results after clicking the "Validate" button.
 ---
 
 ## Changelog
+
+### 1.7
+**ENHANCEMENT:** Expanded content attribute support to all HTML tags. Machine-readable data (e.g., content="2025-11-30") now correctly takes precedence over human-readable text on <span> and <div> elements.
 
 ### 1.6.6
 * **SECURITY:** Improved Input handling and enhanced protection against parameter manipulation attacks.
