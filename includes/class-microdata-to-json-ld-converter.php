@@ -3,7 +3,7 @@
  * Main plugin class.
  * @version 1.7
  *
- * Expanded content attribute support to all HTML tags. Machine-readable data (e.g., content="2025-11-30") now correctly takes precedence over human-readable text on <span> and <div> elements.
+ * v1.7 - Expanded content attribute support to all HTML tags. Machine-readable data (e.g., content="2025-11-30") now correctly takes precedence over human-readable text on <span> and <div> elements.
  * v1.6.6 - Improved input handling and enhanced security against parameter manipulation attacks.  Direct $_GET parameter access now properly uses wp_unslash() before sanitization. JSON-LD schema output now used separated script tag construction and includes security annotations for safe content.
  * v1.6.5 - Replaced deprecated mb_convert_encoding for handling character sets for HTML parsing.
  * v1.6.4 - Added handling of the "itemid" microdata attribute to convert to "@id" schema
