@@ -1,8 +1,9 @@
 <?php
 /**
  * Main plugin class.
- * @version 1.6.6
+ * @version 1.7
  *
+ * Expanded content attribute support to all HTML tags. Machine-readable data (e.g., content="2025-11-30") now correctly takes precedence over human-readable text on <span> and <div> elements.
  * v1.6.6 - Improved input handling and enhanced security against parameter manipulation attacks.  Direct $_GET parameter access now properly uses wp_unslash() before sanitization. JSON-LD schema output now used separated script tag construction and includes security annotations for safe content.
  * v1.6.5 - Replaced deprecated mb_convert_encoding for handling character sets for HTML parsing.
  * v1.6.4 - Added handling of the "itemid" microdata attribute to convert to "@id" schema
@@ -57,6 +58,7 @@ class Microdata_To_JSON_LD_Converter {
 	}
 
 	public function start_buffer() {
+		// $mdtj_preview = isset( $_GET['mdtj_preview'] ) ? sanitize_key( $_GET['mdtj_preview'] ) : '';
 		$mdtj_preview = isset( $_GET['mdtj_preview'] ) ? sanitize_key( wp_unslash( $_GET['mdtj_preview'] ) ) : '';
 
 		if ( is_singular() && get_option('mdtj_remove_microdata') && 'true' !== $mdtj_preview ) {
@@ -368,7 +370,25 @@ class Microdata_To_JSON_LD_Converter {
 		return array('@context' => 'https://schema.org', '@graph' => $items);
 	}
 	private function get_child_properties( $element ) { $properties = array(); $queue = new SplQueue(); foreach ($element->childNodes as $child) $queue->enqueue($child); while (!$queue->isEmpty()) { $node = $queue->dequeue(); if ($node instanceof DOMElement) { if ($node->hasAttribute('itemprop')) $properties[] = $node; if (!$node->hasAttribute('itemscope')) { foreach ($node->childNodes as $child) $queue->enqueue($child); } } } return $properties; }
-	private function get_property_value( $element ) { if ( $element->hasAttribute( 'itemscope' ) ) return $this->parse_item( $element ); $tag = strtoupper( $element->tagName ); if ( in_array($tag, array('A', 'LINK')) ) return $element->getAttribute( 'href' ); if ( in_array($tag, array('IMG', 'VIDEO', 'AUDIO', 'SOURCE')) ) return $element->getAttribute( 'src' ); if ( $tag == 'META' ) return $element->getAttribute( 'content' ); if ( $tag == 'TIME' ) return $element->getAttribute( 'datetime' ); if ( in_array($tag, array('DATA', 'INPUT')) ) return $element->getAttribute( 'value' ); return trim($element->textContent); }
+
+	private function get_property_value( $element ) { 
+	    if ( $element->hasAttribute( 'itemscope' ) ) return $this->parse_item( $element ); 
+	    
+	    // FIX: Check for 'content' attribute on ANY tag first. 
+	    // This allows <span content="ISO">Human</span> to work correctly.
+	    if ( $element->hasAttribute( 'content' ) ) return $element->getAttribute( 'content' );
+
+	    $tag = strtoupper( $element->tagName ); 
+	    
+	    if ( in_array($tag, array('A', 'LINK')) ) return $element->getAttribute( 'href' ); 
+	    if ( in_array($tag, array('IMG', 'VIDEO', 'AUDIO', 'SOURCE')) ) return $element->getAttribute( 'src' ); 
+	    // The specific 'META' check is removed because the global check above handles it.
+	    if ( $tag == 'TIME' ) return $element->getAttribute( 'datetime' ); 
+	    if ( in_array($tag, array('DATA', 'INPUT')) ) return $element->getAttribute( 'value' ); 
+	    
+	    return trim($element->textContent); 
+	}
+
 	public function render_bulk_rebuild_section_text() { echo '<p>' . esc_html__( 'Use this tool to generate JSON-LD for all published items of the selected post types.', 'microdata-to-json-ld-converter' ) . '</p>'; }
 	
 	// UPDATED: Removed inline script tag. It is now in enqueue_admin_assets().
