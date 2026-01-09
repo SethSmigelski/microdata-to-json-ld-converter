@@ -96,6 +96,8 @@ Note: To ensure that the inline Microdata does not serve as a duplicate of the n
 4.  The meta box's validation results after clicking the "Validate" button.
 
 == Changelog ==
+= 1.7.1 =
+* **FIX:** Updated regex to include 'itemid' for removal, producing cleaner HTML and satisfying W3C validation requirements
 
 = 1.7 =
 **ENHANCEMENT:** Expanded content attribute support to all HTML tags. Machine-readable data (e.g., content="2025-11-30") now correctly takes precedence over human-readable text on <span> and <div> elements.
