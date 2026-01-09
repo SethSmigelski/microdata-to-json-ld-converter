@@ -1,7 +1,7 @@
 <?php
 /**
  * Schema.org Validator Class
- * @version 1.7
+ * @version 1.7.1
  */
 class MDTJ_Schema_Validator {
 
