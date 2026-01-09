@@ -276,8 +276,8 @@ class Microdata_To_JSON_LD_Converter {
     public function process_html_buffer($buffer) {
         if (get_option('mdtj_remove_microdata')) {
             $buffer = preg_replace('/<meta[^>]*\sitemprop\s*=\s*(["\'])(?:(?!\1).)*\1[^>]*\/?>/i', '', $buffer);
-            $buffer = preg_replace( '/\s(itemprop|itemscope|itemtype)="[^"]*"/i', '', $buffer );
-            $buffer = preg_replace( '/\s(itemprop|itemscope|itemtype)=\'[^\']*\'/i', '', $buffer );
+            $buffer = preg_replace( '/\s(itemprop|itemscope|itemtype|itemid)="[^"]*"/i', '', $buffer );
+            $buffer = preg_replace( '/\s(itemprop|itemscope|itemtype|itemid)=\'[^\']*\'/i', '', $buffer );
             $buffer = str_replace( ' itemscope', '', $buffer );
         }
         return $buffer;
