@@ -3,7 +3,7 @@ Contributors: sethsm
 Tags: schema.org, Microdata, json-ld, seo, structured data
 Requires at least: 5.5
 Tested up to: 6.8
-Stable tag: 1.7
+Stable tag: 1.7.1
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -97,6 +97,7 @@ Note: To ensure that the inline Microdata does not serve as a duplicate of the n
 
 == Changelog ==
 = 1.7.1 =
+* **FIX:** Improved HTML cleanup by removing <link> tags that contain itemprop attributes when "Remove Inline Microdata" is enabled.
 * **FIX:** Updated regex to include 'itemid' for removal, producing cleaner HTML and satisfying W3C validation requirements
 
 = 1.7 =
