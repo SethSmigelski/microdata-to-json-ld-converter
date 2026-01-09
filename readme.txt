@@ -2,7 +2,7 @@
 Contributors: sethsm
 Tags: schema.org, Microdata, json-ld, seo, structured data
 Requires at least: 5.5
-Tested up to: 6.8
+Tested up to: 6.9
 Stable tag: 1.7.1
 Requires PHP: 7.2
 License: GPLv2 or later
