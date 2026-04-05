@@ -1,7 +1,8 @@
 <?php
 /**
  * Main plugin class.
- * @version 1.7.1
+ * @version 1.8
+ * v1.8 - Adds Website schema for the homepage and CollectionPage schema for tag / category archive pages
  * v1.7.1 - Improved HTML cleanup. Updated regex to include 'itemid' to entirely remove <link> tags that contain an itemprop attribute when "Remove Inline Microdata" is enabled, preventing W3C validation errors in the body.
  * v1.7 - Expanded content attribute support to all HTML tags. Machine-readable data (e.g., content="2025-11-30") now correctly takes precedence over human-readable text on <span> and <div> elements.
  * v1.6.6 - Improved input handling and enhanced security against parameter manipulation attacks.  Direct $_GET parameter access now properly uses wp_unslash() before sanitization. JSON-LD schema output now used separated script tag construction and includes security annotations for safe content.
@@ -61,7 +62,7 @@ class Microdata_To_JSON_LD_Converter {
 		// $mdtj_preview = isset( $_GET['mdtj_preview'] ) ? sanitize_key( $_GET['mdtj_preview'] ) : '';
 		$mdtj_preview = isset( $_GET['mdtj_preview'] ) ? sanitize_key( wp_unslash( $_GET['mdtj_preview'] ) ) : '';
 
-		if ( is_singular() && get_option('mdtj_remove_microdata') && 'true' !== $mdtj_preview ) {
+		if ( ( is_front_page() || is_home() || is_singular() || is_archive() ) && get_option('mdtj_remove_microdata') && 'true' !== $mdtj_preview ) {
 			ob_start(array($this, 'process_html_buffer'));
 		}
 	}
@@ -284,21 +285,91 @@ class Microdata_To_JSON_LD_Converter {
     }
 
 	public function output_json_ld() { 
-		if ( is_singular() && get_option( 'mdtj_create_json' ) ) { 
+		if ( ! get_option( 'mdtj_create_json' ) ) {
+			return;
+		}
+
+		// 1. Single Post Logic (Output the heavy, saved schema)
+		if ( is_singular() ) { 
 			$post_id = get_queried_object_id(); 
 			$json_ld_string = get_post_meta( $post_id, '_mdtj_json_ld', true ); 
 			if ( ! empty( $json_ld_string ) ) { 
 				$json_ld_data = json_decode( $json_ld_string, true ); 
-				if ( json_last_error() === JSON_ERROR_NONE ) { if ( ! isset( $json_ld_data['@context'] ) ) { 
-					$json_ld_data = array('@context' => 'https://schema.org') + $json_ld_data; } 
-					echo '<script type="application/ld+json">';
+				if ( json_last_error() === JSON_ERROR_NONE ) { 
+					if ( ! isset( $json_ld_data['@context'] ) ) { 
+						$json_ld_data = array('@context' => 'https://schema.org') + $json_ld_data; 
+					} 
+					echo '<script type="application/ld+json">' . "\n";
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					echo wp_json_encode($json_ld_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+					echo wp_json_encode($json_ld_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n";
 					echo '</script>' . "\n";
 				} 
 			} 
 		} 
+		// 2. Archive Logic (Generate CollectionPage and ItemList dynamically)
+		elseif ( is_archive() ) {
+			global $wp_query;
+
+			// Grab the Category/Tag details
+			$term_title  = is_category() || is_tag() ? single_term_title( '', false ) : get_the_archive_title();
+			$term_desc   = is_category() || is_tag() ? wp_strip_all_tags( term_description() ) : '';
+			global $wp;
+			$current_url = home_url( add_query_arg( array(), $wp->request ) );
+
+			// Build the list of posts currently on the page
+			$list_items = array();
+			$position = 1;
+
+			foreach ( $wp_query->posts as $post ) {
+				$list_items[] = array(
+					'@type'    => 'ListItem',
+					'position' => $position,
+					'url'      => get_permalink( $post->ID ),
+					'name'     => get_the_title( $post->ID )
+				);
+				$position++;
+			}
+
+			// Construct the CollectionPage schema
+			$collection_schema = array(
+				'@context'    => 'https://schema.org',
+				'@type'       => 'CollectionPage',
+				'url'         => $current_url,
+				'name'        => $term_title,
+				'description' => $term_desc,
+				'mainEntity'  => array(
+					'@type'           => 'ItemList',
+					'itemListElement' => $list_items
+				)
+			);
+
+			// Output the JSON-LD
+			echo '<script type="application/ld+json">' . "\n";
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo wp_json_encode($collection_schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n";
+			echo '</script>' . "\n";
+		}
+		// 3. Homepage / WebSite Logic
+		elseif ( is_front_page() || is_home() ) {
+			
+			// Safety Check 1: Auto-disable if major SEO plugins are active (they output this natively)
+			$allow_website_schema = true;
+			if ( defined( 'WPSEO_VERSION' ) || defined( 'AIOSEO_VERSION' ) || defined( 'RANK_MATH_VERSION' ) ) {
+				$allow_website_schema = false;
+			}
+
+			// Safety Check 2: Provide a filter so developers can disable this if they have a manual script
+			if ( apply_filters( 'mdtj_output_website_schema', $allow_website_schema ) ) {
+				$website_schema = $this->get_schema_for_website();
+				
+				echo '<script type="application/ld+json">' . "\n";
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo wp_json_encode($website_schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n";
+				echo '</script>' . "\n";
+			}
+		}
 	}
+
 	private function parse_item( $element ) {
 		$item = array('@type' => preg_replace( '#https?://schema.org/?#', '', $element->getAttribute( 'itemtype' )));
 		// Check for an itemid attribute and add it as @id if it exists.
@@ -330,6 +401,22 @@ class Microdata_To_JSON_LD_Converter {
 		}
 		return $item;
 	}
+
+	public function get_schema_for_website() {
+		return array(
+			'@context'        => 'https://schema.org',
+			'@type'           => 'WebSite',
+			'url'             => home_url( '/' ),
+			'name'            => get_bloginfo( 'name' ),
+			'description'     => get_bloginfo( 'description' ),
+			'potentialAction' => array(
+				'@type'       => 'SearchAction',
+				'target'      => home_url( '/?s={search_term_string}' ),
+				'query-input' => 'required name=search_term_string',
+			),
+		);
+	}
+
 	public function add_meta_box() { add_meta_box( 'mdtj-json-ld-meta-box', __( 'Schema.org JSON-LD', 'microdata-to-json-ld-converter' ), array( $this, 'render_meta_box' ), null, 'advanced', 'high' ); }
 	
 	public function render_meta_box( $post ) { 
