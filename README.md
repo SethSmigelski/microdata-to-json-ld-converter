@@ -7,7 +7,7 @@ A WordPress plugin to convert existing Schema.org Microdata into the preferred J
 * **Tags:** schema.org, Microdata, json-ld, seo, structured data
 * **Requires at least:** 5.5
 * **Tested up to:** 6.9
-* **Stable tag:** 1.7.1
+* **Stable tag:** 1.8
 * **Requires PHP:** 7.2
 * **License:** GPLv2 or later
 * **License URI:** https://www.gnu.org/licenses/gpl-2.0.html
@@ -19,7 +19,7 @@ A WordPress plugin to convert existing Schema.org Microdata into the preferred J
 
 ## Description
 
-Is your WordPress theme or website built with inline Schema.org Microdata? As search engines increasingly prefer the JSON-LD format for structured data, updating your site can be a significant challenge. Manually removing old Microdata and creating new JSON-LD scripts for every page is tedious and prone to errors.
+Is your WordPress theme or website built with inline Schema.org Microdata? As search engines increasingly prefer the JSON-LD format for structured data, updating your site can be a significant challenge. Manually removing old Microdata and creating new JSON-LD scripts for every page is tedious and error-prone.
 
 The **Microdata to JSON-LD Converter** solves this exact problem. This plugin seamlessly automates the entire conversion process:
 
@@ -37,6 +37,8 @@ The **Microdata to JSON-LD Converter** solves this exact problem. This plugin se
 * **Bulk Rebuild Tool:** Process your entire site at once with a batch-processing tool that works through all your posts and pages.
 * **"Set It and Forget It" Mode:** Enable the "Keep JSON-LD up to date" option to ensure your structured data remains current.
 * **Clean & Modern UI:** A simple, intuitive settings page with toggle switches and tabs makes configuration a breeze.
+* **Homepage WebSite Schema:**  Automatically generates WebSite JSON-LD for your homepage, complete with a Sitelinks Search Box to improve your site's search presence.
+* **Dynamic Archive Schema:**  Automatically constructs lightweight CollectionPage and ItemList JSON-LD schema for Category and Tag pages, matching Google's exact specifications for list data without slowing down your server.
 
 This plugin offers a seamless migration path for modernizing your site’s SEO and structured data implementation, eliminating the need to edit your content, plugins, and theme files.
 
@@ -87,6 +89,13 @@ The "Remove Inline Microdata from HTML" option works by capturing the entire pag
 
 Yes. In the "Schema.org JSON-LD" meta box, you have two options. The "Validate" button runs a check against a built-in list of best practices for common schema types. For a complete, official analysis, use the "Test on Google" button to open the page in Google’s Rich Results Test.
 
+### How do I disable the automatically generated WebSite schema on my homepage?
+
+The plugin automatically detects major SEO plugins (like Yoast, AIOSEO, and Rank Math) and safely disables its own WebSite schema to prevent duplicates. However, if you are manually injecting your own custom script and need to disable the plugin's output, you can do so by adding this single line to your theme's functions.php file:
+    `
+    add_filter( 'mdtj_output_website_schema', '__return_false' );
+    `
+    
 ### How is this plugin connected to the Microdata Refinement Department at LUMON?
 
 This plugin bears no relation whatsoever to LUMON or the MDR Department on the Severed Floor. The "Microdata" processed by this plugin is a structured data markup outlined by schema.org, which has fallen out of favor and has largely been replaced by the JSON-LD format (hence, why this converter exists).
@@ -123,6 +132,14 @@ The meta box’s validation results after clicking the "Validate" button.
 ---
 
 ## Changelog
+
+### 1.8
+* **New:** Added dynamic CollectionPage and ItemList JSON-LD schema generation for Category and Tag archive pages.
+* **New:** Added WebSite JSON-LD schema (including Sitelinks Search Box) for the front page/blog index.
+* **New:** Introduced the mdtj_output_website_schema filter to safely disable the homepage schema generation if using a custom implementation.
+* **Tweak:** Expanded the inline microdata removal tool to actively sweep and clean archive and home pages.
+
+
 
 ### 1.7.1
 * **FIX:** Improved HTML cleanup by removing <link> tags that contain itemprop attributes when "Remove Inline Microdata" is enabled.
