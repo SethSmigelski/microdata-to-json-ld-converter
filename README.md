@@ -7,7 +7,7 @@ A WordPress plugin to convert existing Schema.org Microdata into the preferred J
 * **Tags:** schema.org, Microdata, json-ld, seo, structured data
 * **Requires at least:** 5.5
 * **Tested up to:** 6.9
-* **Stable tag:** 1.8
+* **Stable tag:** 1.8.1
 * **Requires PHP:** 7.2
 * **License:** GPLv2 or later
 * **License URI:** https://www.gnu.org/licenses/gpl-2.0.html
@@ -133,18 +133,18 @@ The meta box’s validation results after clicking the "Validate" button.
 
 ## Changelog
 
+### 1.8.1
+* **Fixed:** Resolved an issue where JSON-LD schema could break or compress incorrectly when saving posts containing special characters or double quotes.
+  
 ### 1.8
 * **New:** Added dynamic CollectionPage and ItemList JSON-LD schema generation for Category and Tag archive pages.
 * **New:** Added WebSite JSON-LD schema (including Sitelinks Search Box) for the front page/blog index.
 * **New:** Introduced the mdtj_output_website_schema filter to safely disable the homepage schema generation if using a custom implementation.
 * **Tweak:** Expanded the inline microdata removal tool to actively sweep and clean archive and home pages.
 
-
-
 ### 1.7.1
 * **FIX:** Improved HTML cleanup by removing <link> tags that contain itemprop attributes when "Remove Inline Microdata" is enabled.
 * **FIX:** Updated regex to include 'itemid' for removal, producing cleaner HTML and satisfying W3C validation requirements
-
 
 ### 1.7
 **ENHANCEMENT:** Expanded content attribute support to all HTML tags. Machine-readable data (e.g., content="2025-11-30") now correctly takes precedence over human-readable text on <span> and <div> elements.
