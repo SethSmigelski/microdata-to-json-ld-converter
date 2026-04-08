@@ -1,28 +1,11 @@
 <?php
 /**
  * Main plugin class.
- * @version 1.8
- * v1.8 - Adds Website schema for the homepage and CollectionPage schema for tag / category archive pages
+ * @version 1.8.1
+ * v1.81 - Fixed: Improved data sanitization during the save process to prevent JSON syntax errors. The plugin now perfectly preserves complex punctuation, double quotes, and international characters (like the Hawaiian ‘okina) in your schema output.
+ * v1.8 - Adds Website schema for the homepage and CollectionPage schema for tag and category archive pages
  * v1.7.1 - Improved HTML cleanup. Updated regex to include 'itemid' to entirely remove <link> tags that contain an itemprop attribute when "Remove Inline Microdata" is enabled, preventing W3C validation errors in the body.
  * v1.7 - Expanded content attribute support to all HTML tags. Machine-readable data (e.g., content="2025-11-30") now correctly takes precedence over human-readable text on <span> and <div> elements.
- * v1.6.6 - Improved input handling and enhanced security against parameter manipulation attacks.  Direct $_GET parameter access now properly uses wp_unslash() before sanitization. JSON-LD schema output now used separated script tag construction and includes security annotations for safe content.
- * v1.6.5 - Replaced deprecated mb_convert_encoding for handling character sets for HTML parsing.
- * v1.6.4 - Added handling of the "itemid" microdata attribute to convert to "@id" schema
- * v1.6 - Resolved an unintended consequence of the previous update in which attributes with content of "0" was voided. Implemented a smarter parsing logic.
- * v1.5.6 - corrected logic for to address Object vs. Array Confusion with some attributes.
- * v1.5.5 - Added a warning message for the "Remove Inline Microdata from HTML" setting.
- * - "Enabling this may conflict with server-side caching systems (e.g., Varnish). If you use a managed host with advanced caching, please test this feature carefully."  
- * - This option, while effective, may prevent some server-side caching systems from serving cached pages. 
- * - If you are on a managed WordPress host that uses this type of caching, test this feature to ensure there are no conflicts or keep it disabled if you notice issues with your site's cache.
- * v1.5.4 - Security and WordPress Standards Update.
- * - Refactored to use admin_enqueue_scripts for all CSS/JS.
- * - Added sanitization for nonce verification.
- * - Implemented recursive sanitization for all incoming JSON data.
- * - Replaced direct PHP variables in JS with wp_localize_script for improved security.
- * v1.5.3 - Fixed a bug where the scheduler would not process Media (attachments) due to incorrect post_status.
- * v1.5.2 - Added a log to display the results of the last completed scheduled rebuild.
- * v1.5.1 - Improved scheduler status feedback to prevent "false negative" on save.
- * v1.5.0 - Added a WP-Cron based scheduler for automatic background rebuilding of JSON-LD.
  */
 class Microdata_To_JSON_LD_Converter {
 
@@ -127,12 +110,20 @@ class Microdata_To_JSON_LD_Converter {
 
 		$json_array = $this->generate_json_from_html( $html );
 		if ( !empty($json_array) ) {
-			$json_string = wp_json_encode($json_array, JSON_UNESCAPED_UNICODE);
-			update_post_meta($post_id, '_mdtj_json_ld', $json_string);
-			$pretty_json = wp_json_encode($json_array, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+			
+			// 1. Generate the string with the safe Unicode and Quote flags
+			$json_string = wp_json_encode( $json_array, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT );
+			
+			// 2. CRITICAL: Wrap the string in wp_slash() before saving to post meta
+			update_post_meta( $post_id, '_mdtj_json_ld', wp_slash( $json_string ) );
+			
+			// 3. Update the preview generator for consistency
+			$pretty_json = wp_json_encode( $json_array, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+			
 			$result = array('success' => true, 'message' => 'Success');
 			if ($send_json_response) wp_send_json_success( $pretty_json );
 			return $result;
+			
 		} else {
 			delete_post_meta($post_id, '_mdtj_json_ld');
 			$result = array('success' => false, 'message' => 'No microdata found.');
