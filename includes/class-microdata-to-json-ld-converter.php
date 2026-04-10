@@ -284,6 +284,9 @@ class Microdata_To_JSON_LD_Converter {
             // 4. Clean up wpautop's mess
             $buffer = preg_replace('/<p>(?:\s|<br\s*\/?>)*<\/div>/i', '</div>', $buffer);
             $buffer = preg_replace('/<p>(?:\s|<br\s*\/?>)*<\/p>/i', '', $buffer);
+			
+			// 5. Destroy orphaned </p> tags placed immediately after any opening <div>
+            $buffer = preg_replace('/(<div[^>]*>)(?:\s|<br\s*\/?>)*<\/p>/i', '$1', $buffer);
         }
         return $buffer;
     }
