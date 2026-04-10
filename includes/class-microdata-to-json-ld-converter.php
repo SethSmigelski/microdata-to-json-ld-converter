@@ -264,13 +264,20 @@ class Microdata_To_JSON_LD_Converter {
 			echo '<p class="description" style="color: #c83333;"><strong>' . esc_html__('Warning:', 'microdata-to-json-ld-converter') . '</strong> ' . wp_kses_post($warning) . '</p>';
 		}
 	}
-	
-    public function process_html_buffer($buffer) {
+	public function process_html_buffer($buffer) {
         if (get_option('mdtj_remove_microdata')) {
-            $buffer = preg_replace('/<(meta|link)[^>]*\sitemprop\s*=\s*(["\'])(?:(?!\2).)*\2[^>]*\/?>/i', '', $buffer);
+            // 1. Strip the microdata tags
+            $buffer = preg_replace('/\s*<(meta|link)[^>]*\sitemprop\s*=\s*(["\'])(?:(?!\2).)*\2[^>]*\/?>\s*/i', '', $buffer);
             $buffer = preg_replace( '/\s(itemprop|itemscope|itemtype|itemid)="[^"]*"/i', '', $buffer );
             $buffer = preg_replace( '/\s(itemprop|itemscope|itemtype|itemid)=\'[^\']*\'/i', '', $buffer );
             $buffer = str_replace( ' itemscope', '', $buffer );
+
+            // 2. THE FIX: Clean up wpautop's mess now that the meta tags are gone
+            // Destroys <p></div> and <p><br></div>
+            $buffer = preg_replace('/<p>(?:\s|<br\s*\/?>)*<\/div>/i', '</div>', $buffer);
+            
+            // Also cleans up any totally empty paragraphs left floating around
+            $buffer = preg_replace('/<p>(?:\s|<br\s*\/?>)*<\/p>/i', '', $buffer);
         }
         return $buffer;
     }
