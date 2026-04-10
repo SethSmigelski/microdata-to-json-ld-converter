@@ -266,17 +266,23 @@ class Microdata_To_JSON_LD_Converter {
 	}
 	public function process_html_buffer($buffer) {
         if (get_option('mdtj_remove_microdata')) {
-            // 1. Strip the microdata tags
+            // 1. Strip the microdata tags and their surrounding whitespace
             $buffer = preg_replace('/\s*<(meta|link)[^>]*\sitemprop\s*=\s*(["\'])(?:(?!\2).)*\2[^>]*\/?>\s*/i', '', $buffer);
+            
+            // 2. Strip microdata attributes
             $buffer = preg_replace( '/\s(itemprop|itemscope|itemtype|itemid)="[^"]*"/i', '', $buffer );
             $buffer = preg_replace( '/\s(itemprop|itemscope|itemtype|itemid)=\'[^\']*\'/i', '', $buffer );
             $buffer = str_replace( ' itemscope', '', $buffer );
 
-            // 2. THE FIX: Clean up wpautop's mess now that the meta tags are gone
-            // Destroys <p></div> and <p><br></div>
+            // 3. NEW: Recursively eat empty formatting spans
+            // Stripping attributes above leaves `<span >`. The do...while loop 
+            // completely consumes nested empty elements like <span><span></span></span>
+            do {
+                $buffer = preg_replace('/<span\s*>\s*<\/span>/i', '', $buffer, -1, $count);
+            } while ($count > 0);
+
+            // 4. Clean up wpautop's mess
             $buffer = preg_replace('/<p>(?:\s|<br\s*\/?>)*<\/div>/i', '</div>', $buffer);
-            
-            // Also cleans up any totally empty paragraphs left floating around
             $buffer = preg_replace('/<p>(?:\s|<br\s*\/?>)*<\/p>/i', '', $buffer);
         }
         return $buffer;
