@@ -105,8 +105,8 @@ Note: To ensure that the inline Microdata does not serve as a duplicate of the n
 
 == Changelog ==
 = 1.8.2 =
-* **FIX:** Improved cleanup of malformed (and unmatched) <p> and <div> tags that may be created by wpautop surrounding removed microdata2 
-* **IMPROVEMENT:** Cleaner HTML output by removing empty <span></span> left behind by microdata removal.
+* **FIX:** Improved cleanup of malformed (and unmatched) `<p>` and `<div>` tags that may be created by wpautop surrounding removed microdata. 
+* **IMPROVEMENT:** Cleaner HTML output by removing empty `<span></span>` left behind by microdata removal.
 
 = 1.8.1 =
 * **FIX:** Resolved an issue where JSON-LD schema could break or compress incorrectly when saving posts containing special characters or double quotes.
