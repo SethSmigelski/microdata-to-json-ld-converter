@@ -135,7 +135,7 @@ The meta box’s validation results after clicking the "Validate" button.
 
 ### 1.8.2
 * **FIX:** Improved cleanup of malformed (and unmatched) `<p>` and `<div>` tags that may be created by wpautop surrounding removed microdata. 
-* **IMPROVEMENT:** Cleaner HTML output by removing empty `<span></span>` left behind by microdata removal.
+* **IMPROVEMENT:** Cleaner HTML output by removing any empty `<span></span>` left behind by microdata removal.
 
 ### 1.8.1
 * **FIX:** Resolved an issue where JSON-LD schema could break or compress incorrectly when saving posts containing special characters or double quotes.
