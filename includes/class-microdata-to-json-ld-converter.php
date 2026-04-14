@@ -1,8 +1,9 @@
 <?php
 /**
  * Main plugin class.
- * @version 1.8.1
- * v1.81 - Fixed: Improved data sanitization during the save process to prevent JSON syntax errors. The plugin now perfectly preserves complex punctuation, double quotes, and international characters (like the Hawaiian ‘okina) in your schema output.
+ * @version 1.8.2
+ * v1.8.2 - Fixed: Improved cleanup of malformed (and unmatched) <p> and <div> tags created by wpautop surrounding removed microdata, as well as empty <span></span> left behind by microdata removal.
+ * v1.8.1 - Fixed: Improved data sanitization during the save process to prevent JSON syntax errors. The plugin now perfectly preserves complex punctuation, double quotes, and international characters (like the Hawaiian ‘okina) in your schema output.
  * v1.8 - Adds Website schema for the homepage and CollectionPage schema for tag and category archive pages
  * v1.7.1 - Improved HTML cleanup. Updated regex to include 'itemid' to entirely remove <link> tags that contain an itemprop attribute when "Remove Inline Microdata" is enabled, preventing W3C validation errors in the body.
  * v1.7 - Expanded content attribute support to all HTML tags. Machine-readable data (e.g., content="2025-11-30") now correctly takes precedence over human-readable text on <span> and <div> elements.
