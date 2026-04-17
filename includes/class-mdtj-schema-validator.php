@@ -1,7 +1,7 @@
 <?php
 /**
  * Schema.org Validator Class
- * @version 1.8.2
+ * @version 1.8.3
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
