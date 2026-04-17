@@ -96,8 +96,20 @@ class Microdata_To_JSON_LD_Converter {
 			if ( json_last_error() === JSON_ERROR_NONE ) {
 				// UPDATED: Sanitize the decoded JSON data before saving.
 				$sanitized_data = $this->sanitize_json_recursively( $decoded_json );
-				$clean_json = wp_json_encode( $sanitized_data, JSON_UNESCAPED_UNICODE );
-				update_post_meta( $post_id, '_mdtj_json_ld', $clean_json );
+				
+				// Handle long floats cleanly
+				ini_set( 'serialize_precision', -1 );
+        
+				
+				// Add the SLASHES and HEX_QUOT flags to match your generator
+				$clean_json = wp_json_encode( $sanitized_data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_QUOT );
+        		$clean_json = $this->fix_json_floats( $clean_json );
+				
+				// --- ADD THIS LINE to fix server float bugs ---
+        		$clean_json = $this->fix_json_floats( $clean_json );
+				
+        		// Use wp_slash before saving to the DB to preserve escapes
+        		update_post_meta( $post_id, '_mdtj_json_ld', wp_slash( $clean_json ) );
 			}
 		}
 	}
@@ -131,18 +143,20 @@ class Microdata_To_JSON_LD_Converter {
 			
 			// --- Sanitize JSON recursively, ensuring proper handling of numbers and booleans.
     		$json_array = $this->sanitize_json_recursively( $json_array );
-
+			
 			// Force PHP to use a cleaner serialization precision for floats to correct for long fractions.
 			ini_set( 'serialize_precision', -1 );
     
 			// 1. Generate the string with the safe Unicode and Quote flags
 			$json_string = wp_json_encode( $json_array, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT );
+			$json_string = $this->fix_json_floats( $json_string ); // FIX JSON FLOATS
 			
 			// 2. CRITICAL: Wrap the string in wp_slash() before saving to post meta
 			update_post_meta( $post_id, '_mdtj_json_ld', wp_slash( $json_string ) );
 			
 			// 3. Update the preview generator for consistency
 			$pretty_json = wp_json_encode( $json_array, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+			$pretty_json = $this->fix_json_floats( $pretty_json ); // FIX THE AJAX PREVIEW
 			
 			$result = array('success' => true, 'message' => 'Success');
 			if ($send_json_response) wp_send_json_success( $pretty_json );
@@ -339,8 +353,11 @@ class Microdata_To_JSON_LD_Converter {
 						$json_ld_data = array('@context' => 'https://schema.org') + $json_ld_data; 
 					} 
 					echo '<script type="application/ld+json">' . "\n";
+					$out_json = wp_json_encode($json_ld_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+					$out_json = $this->fix_json_floats( $out_json ); // FIX THE LIVE OUTPUT
+
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					echo wp_json_encode($json_ld_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n";
+					echo $out_json . "\n";
 					echo '</script>' . "\n";
 				} 
 			} 
@@ -464,7 +481,8 @@ class Microdata_To_JSON_LD_Converter {
 		$decoded = json_decode($json_ld); 
 		if (json_last_error() === JSON_ERROR_NONE) { 
 			$json_ld = wp_json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); 
-		} 
+			$json_ld = $this->fix_json_floats( $json_ld ); // FIX THE TEXTAREA DISPLAY
+		}
 		echo '<p>' . esc_html__( 'The JSON-LD generated from the Microdata on this page. You can manually edit it here.', 'microdata-to-json-ld-converter' ) . '</p>'; 
 		echo '<textarea style="width:100%; min-height: 250px; font-family: monospace;" id="mdtj_json_ld" name="mdtj_json_ld">' . esc_textarea( $json_ld ) . '</textarea>'; 
 		echo '<div style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">'; 
@@ -749,6 +767,17 @@ class Microdata_To_JSON_LD_Converter {
 	        return sanitize_text_field( $data );
 	    }
 	    return $data;
+	}
+	
+	/**
+	 * Cleans up messy floating point serialization (e.g. 2.6699999999) caused by 
+	 * PHP's serialize_precision when ini_set is disabled by the server.
+	 */
+	private function fix_json_floats( $json_string ) {
+	    // Matches unquoted numbers with 5 or more decimal places following a colon, comma, or bracket
+	    return preg_replace_callback( '/([:,\[]\s*)(-?\d+\.\d{5,})/', function( $matches ) {
+	        return $matches[1] . (string) round( (float) $matches[2], 5 );
+	    }, $json_string );
 	}
 
 	// --- SCHEDULER ---
