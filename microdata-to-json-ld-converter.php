@@ -11,10 +11,7 @@
  * Text Domain: microdata-to-json-ld-converter
  */
 
-// If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) ) {
-	die;
-}
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 // 1. Define plugin constants
 define( 'MDTJ_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
