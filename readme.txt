@@ -3,7 +3,7 @@ Contributors: sethsm
 Tags: schema.org, Microdata, json-ld, seo, structured data
 Requires at least: 5.5
 Tested up to: 6.9
-Stable tag: 1.8.2
+Stable tag: 1.8.3
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -104,6 +104,10 @@ Note: To ensure that the inline Microdata does not serve as a duplicate of the n
 4.  The meta box's validation results after clicking the "Validate" button.
 
 == Changelog ==
+
+= 1.8.3 =
+* **IMPROVEMENT:** Enhanced type-casting for Schema properties. Numbers and booleans (e.g., true/false) extracted from Microdata are now output as native JSON data types rather than strings, ensuring strict compliance with Schema.org standards and with rich results testing tools.
+
 = 1.8.2 =
 * **FIX:** Improved cleanup of malformed (and unmatched) `<p>` and `<div>` tags that may be created by wpautop surrounding removed microdata. 
 * **IMPROVEMENT:** Cleaner HTML output by removing any empty `<span></span>` left behind by microdata removal.
