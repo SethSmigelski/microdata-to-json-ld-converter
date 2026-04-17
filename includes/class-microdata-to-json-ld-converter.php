@@ -1,7 +1,8 @@
 <?php
 /**
  * Main plugin class.
- * @version 1.8.3
+ * @version 1.8.4
+ * v1.8.4 - Improvement: Use a cleaner serialization precision for floats to correct for long fractions.
  * v1.8.3 - Fix: Proper handling of numbers and booleans when converting from Microdata.
  * v1.8.2 - Fixed: Improved cleanup of malformed (and unmatched) <p> and <div> tags created by wpautop surrounding removed microdata, as well as empty <span></span> left behind by microdata removal.
  * v1.8.1 - Fixed: Improved data sanitization during the save process to prevent JSON syntax errors. The plugin now perfectly preserves complex punctuation, double quotes, and international characters (like the Hawaiian ‘okina) in your schema output.
@@ -130,6 +131,9 @@ class Microdata_To_JSON_LD_Converter {
 			
 			// --- Sanitize JSON recursively, ensuring proper handling of numbers and booleans.
     		$json_array = $this->sanitize_json_recursively( $json_array );
+
+			// Force PHP to use a cleaner serialization precision for floats to correct for long fractions.
+			ini_set( 'serialize_precision', -1 );
     
 			// 1. Generate the string with the safe Unicode and Quote flags
 			$json_string = wp_json_encode( $json_array, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT );
