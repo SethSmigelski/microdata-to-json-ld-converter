@@ -1,13 +1,16 @@
 <?php
 /**
  * Main plugin class.
- * @version 1.8.2
+ * @version 1.8.3
+ * v1.8.3 - Fix: Proper handling of numbers and booleans when converting from Microdata.
  * v1.8.2 - Fixed: Improved cleanup of malformed (and unmatched) <p> and <div> tags created by wpautop surrounding removed microdata, as well as empty <span></span> left behind by microdata removal.
  * v1.8.1 - Fixed: Improved data sanitization during the save process to prevent JSON syntax errors. The plugin now perfectly preserves complex punctuation, double quotes, and international characters (like the Hawaiian ‘okina) in your schema output.
  * v1.8 - Adds Website schema for the homepage and CollectionPage schema for tag and category archive pages
  * v1.7.1 - Improved HTML cleanup. Updated regex to include 'itemid' to entirely remove <link> tags that contain an itemprop attribute when "Remove Inline Microdata" is enabled, preventing W3C validation errors in the body.
  * v1.7 - Expanded content attribute support to all HTML tags. Machine-readable data (e.g., content="2025-11-30") now correctly takes precedence over human-readable text on <span> and <div> elements.
  */
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class Microdata_To_JSON_LD_Converter {
 
 	protected static $_instance = null;
@@ -43,12 +46,21 @@ class Microdata_To_JSON_LD_Converter {
 	}
 
 	public function start_buffer() {
-		// $mdtj_preview = isset( $_GET['mdtj_preview'] ) ? sanitize_key( $_GET['mdtj_preview'] ) : '';
-		$mdtj_preview = isset( $_GET['mdtj_preview'] ) ? sanitize_key( wp_unslash( $_GET['mdtj_preview'] ) ) : '';
+	    // Nonce verification is intentionally omitted: this parameter is a read-only
+	    // display flag that only affects output buffering for the current user's preview.
+	    // Abuse is mitigated by the capability check immediately below.
+	    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	    $mdtj_preview = isset( $_GET['mdtj_preview'] ) ? sanitize_key( wp_unslash( $_GET['mdtj_preview'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+ 
+	    // Check permissions if previewing, otherwise anyone could trigger an ob_start
+	    if ( 'true' === $mdtj_preview && ! current_user_can( 'edit_posts' ) ) {
+	        return;
+	    }
 
-		if ( ( is_front_page() || is_home() || is_singular() || is_archive() ) && get_option('mdtj_remove_microdata') && 'true' !== $mdtj_preview ) {
-			ob_start(array($this, 'process_html_buffer'));
-		}
+ 
+	    if ( ( is_front_page() || is_home() || is_singular() || is_archive() ) && get_option('mdtj_remove_microdata') && 'true' !== $mdtj_preview ) {
+	        ob_start(array($this, 'process_html_buffer'));
+	    }
 	}
 
 	public function save_post_meta( $post_id ) {
@@ -69,11 +81,15 @@ class Microdata_To_JSON_LD_Converter {
 		}
 
 		if ( isset( $_POST['mdtj_json_ld'] ) ) {
-			$json_string = wp_unslash( $_POST['mdtj_json_ld'] );
-			if ( empty( trim( $json_string ) ) ) {
-				delete_post_meta($post_id, '_mdtj_json_ld');
-				return;
-			}
+		    // Sanitization is handled downstream by sanitize_json_recursively() after json_decode().
+		    // sanitize_text_field() is intentionally not used here as it would corrupt JSON
+		    // (stripping slashes, quotes, and Unicode). The nonce is verified above.
+		    $json_string = trim( (string) wp_unslash( $_POST['mdtj_json_ld'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		    
+		    if ( empty( $json_string ) ) {
+		        delete_post_meta( $post_id, '_mdtj_json_ld' );
+		        return;
+		    }
 			
 			$decoded_json = json_decode( $json_string );
 			if ( json_last_error() === JSON_ERROR_NONE ) {
@@ -112,6 +128,9 @@ class Microdata_To_JSON_LD_Converter {
 		$json_array = $this->generate_json_from_html( $html );
 		if ( !empty($json_array) ) {
 			
+			// --- Sanitize JSON recursively, ensuring proper handling of numbers and booleans.
+    		$json_array = $this->sanitize_json_recursively( $json_array );
+    
 			// 1. Generate the string with the safe Unicode and Quote flags
 			$json_string = wp_json_encode( $json_array, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT );
 			
@@ -147,10 +166,17 @@ class Microdata_To_JSON_LD_Converter {
 		if (!current_user_can('edit_posts')) {
 			wp_send_json_error(['message' => 'Permission denied.']);
 		}
-		
-		$json_string = isset($_POST['json_ld']) ? wp_unslash($_POST['json_ld']) : '';
+ 
+		// Sanitization is handled downstream via sanitize_json_recursively() after json_decode().
+		// sanitize_text_field() is intentionally not used as it would corrupt valid JSON
+		// (stripping quotes, slashes, and Unicode). Nonce is verified via check_ajax_referer() above.
+		$json_string = isset( $_POST['json_ld'] ) ? (string) wp_unslash( $_POST['json_ld'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+ 
+		// Add a quick check to ensure it's a string
+		if ( ! is_string( $json_string ) ) { $json_string = ''; }
+ 
 		$data = json_decode($json_string, true);
-
+ 
 		if (json_last_error() !== JSON_ERROR_NONE) {
 			wp_send_json_error(['message' => 'Invalid JSON syntax: ' . json_last_error_msg()]);
 		}
@@ -159,7 +185,7 @@ class Microdata_To_JSON_LD_Converter {
 		$sanitized_data = $this->sanitize_json_recursively( $data );
 		$validator = new MDTJ_Schema_Validator( $sanitized_data );
 		$results = $validator->validate();
-
+ 
 		$html = '<h4>' . esc_html__('Validation Results', 'microdata-to-json-ld-converter') . '</h4>';
 		if (empty($results)) {
 			$html .= '<p style="color:green;">' . esc_html__('No issues found based on built-in best practices!', 'microdata-to-json-ld-converter') . '</p>';
@@ -180,9 +206,10 @@ class Microdata_To_JSON_LD_Converter {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => 'Permission denied.' ) );
 		}
-		
-		$post_types_raw = isset($_POST['post_types']) ? (array) wp_unslash( $_POST['post_types'] ) : array();
-		$post_types = array_map( 'sanitize_text_field', $post_types_raw );
+		// Cast to array immediately, then sanitize each element with sanitize_text_field().
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each element is sanitized via array_map on the next line.
+		$post_types_raw = isset( $_POST['post_types'] ) ? (array) wp_unslash( $_POST['post_types'] ) : array();
+		$post_types     = array_map( 'sanitize_text_field', $post_types_raw );
 		
 		$offset = isset($_POST['offset']) ? intval($_POST['offset']) : 0;
 		$batch_size = 10;
@@ -688,21 +715,36 @@ class Microdata_To_JSON_LD_Converter {
 	}
 	
 	/**
-	 * NEW: Recursively sanitizes decoded JSON data.
+	 * Recursively sanitizes decoded JSON data.
+	 * Show Numbers and Boolean true / false without quotes.
 	 */
 	private function sanitize_json_recursively( $data ) {
-		if ( is_array( $data ) ) {
-			foreach ( $data as $key => $value ) {
-				$data[ $key ] = $this->sanitize_json_recursively( $value );
-			}
-		} elseif ( is_object( $data ) ) {
-			foreach ( $data as $key => $value ) {
-				$data->$key = $this->sanitize_json_recursively( $value );
-			}
-		} elseif ( is_string( $data ) ) {
-			return sanitize_text_field( $data );
-		}
-		return $data;
+	    if ( is_array( $data ) ) {
+	        foreach ( $data as $key => $value ) {
+	            $data[ $key ] = $this->sanitize_json_recursively( $value );
+	        }
+	    } elseif ( is_object( $data ) ) {
+	        foreach ( $data as $key => $value ) {
+	            $data->$key = $this->sanitize_json_recursively( $value );
+	        }
+	    } elseif ( is_string( $data ) ) {
+	        $trimmed_val = trim( $data );
+	        $lower_val = strtolower( $trimmed_val );
+
+	        // 1. Handle Booleans
+	        if ( $lower_val === 'true' ) return true;
+	        if ( $lower_val === 'false' ) return false;
+
+	        // 2. Handle Numbers (Integers and Floats)
+	        // We check if it's numeric AND doesn't start with a zero (to avoid stripping leading zeros in zip codes or IDs)
+	        if ( is_numeric( $trimmed_val ) && ! preg_match( '/^0[0-9]+/', $trimmed_val ) ) {
+	            // Return as float if it has a decimal, otherwise return as int
+	            return ( strpos( $trimmed_val, '.' ) !== false ) ? (float) $trimmed_val : (int) $trimmed_val;
+	        }
+	        
+	        return sanitize_text_field( $data );
+	    }
+	    return $data;
 	}
 
 	// --- SCHEDULER ---
