@@ -133,6 +133,10 @@ The meta box’s validation results after clicking the "Validate" button.
 
 ## Changelog
 
+### 1.8.3
+* **IMPROVEMENT:** Enhanced type-casting for Schema properties. Numbers and booleans (e.g., true/false) extracted from Microdata are now output as native JSON data types rather than strings, ensuring strict compliance with Schema.org standards and with rich results testing tools.
+
+
 ### 1.8.2
 * **FIX:** Improved cleanup of malformed (and unmatched) `<p>` and `<div>` tags that may be created by wpautop surrounding removed microdata. 
 * **IMPROVEMENT:** Cleaner HTML output by removing any empty `<span></span>` left behind by microdata removal.
