@@ -90,10 +90,6 @@ class Microdata_To_JSON_LD_Converter {
 				// UPDATED: Sanitize the decoded JSON data before saving.
 				$sanitized_data = $this->sanitize_json_recursively( $decoded_json );
 				
-				// Handle long floats cleanly
-				ini_set( 'serialize_precision', -1 );
-        
-				
 				// Add the SLASHES and HEX_QUOT flags to match your generator
 				$clean_json = wp_json_encode( $sanitized_data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_QUOT );
 				
@@ -140,18 +136,15 @@ class Microdata_To_JSON_LD_Converter {
 			if ( get_option( 'mdtj_auto_link_entities' ) ) {
 			    $json_array = $this->auto_link_schema_entities( $json_array, $url );
 			}
-
-			// 3. Force PHP to use a cleaner serialization precision
-			ini_set( 'serialize_precision', -1 );
     
-			// 4. Generate the string with the safe Unicode and Quote flags
+			// 3. Generate the string with the safe Unicode and Quote flags
 			$json_string = wp_json_encode( $json_array, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT );
 			$json_string = $this->fix_json_floats( $json_string ); // FIX JSON FLOATS
 			
-			// 5. Wrap the string in wp_slash() before saving to post meta
+			// 4. Wrap the string in wp_slash() before saving to post meta
 			update_post_meta( $post_id, '_mdtj_json_ld', wp_slash( $json_string ) );
 			
-			// 6. Update the preview generator for consistency
+			// 5. Update the preview generator for consistency
 			$pretty_json = wp_json_encode( $json_array, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
 			$pretty_json = $this->fix_json_floats( $pretty_json ); // FIX THE AJAX PREVIEW
 			
@@ -775,7 +768,7 @@ class Microdata_To_JSON_LD_Converter {
 	
 	/**
 	 * Cleans up messy floating point serialization (e.g. 2.6699999999) caused by 
-	 * PHP's serialize_precision when ini_set is disabled by the server.
+	 * PHP's serialize_precision 
 	 */
 	private function fix_json_floats( $json_string ) {
 	    // Matches unquoted numbers with 5 or more decimal places following a colon, comma, or bracket
