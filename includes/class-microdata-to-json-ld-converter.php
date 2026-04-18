@@ -1,14 +1,7 @@
 <?php
 /**
  * Main plugin class.
- * @version 1.8.4
- * v1.8.4 - Improvement: Use a cleaner serialization precision for floats to correct for long fractions.
- * v1.8.3 - Fix: Proper handling of numbers and booleans when converting from Microdata.
- * v1.8.2 - Fixed: Improved cleanup of malformed (and unmatched) <p> and <div> tags created by wpautop surrounding removed microdata, as well as empty <span></span> left behind by microdata removal.
- * v1.8.1 - Fixed: Improved data sanitization during the save process to prevent JSON syntax errors. The plugin now perfectly preserves complex punctuation, double quotes, and international characters (like the Hawaiian ‘okina) in your schema output.
- * v1.8 - Adds Website schema for the homepage and CollectionPage schema for tag and category archive pages
- * v1.7.1 - Improved HTML cleanup. Updated regex to include 'itemid' to entirely remove <link> tags that contain an itemprop attribute when "Remove Inline Microdata" is enabled, preventing W3C validation errors in the body.
- * v1.7 - Expanded content attribute support to all HTML tags. Machine-readable data (e.g., content="2025-11-30") now correctly takes precedence over human-readable text on <span> and <div> elements.
+ * @version 1.9
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
@@ -103,7 +96,6 @@ class Microdata_To_JSON_LD_Converter {
 				
 				// Add the SLASHES and HEX_QUOT flags to match your generator
 				$clean_json = wp_json_encode( $sanitized_data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_QUOT );
-        		$clean_json = $this->fix_json_floats( $clean_json );
 				
 				// --- ADD THIS LINE to fix server float bugs ---
         		$clean_json = $this->fix_json_floats( $clean_json );
@@ -140,21 +132,26 @@ class Microdata_To_JSON_LD_Converter {
 
 		$json_array = $this->generate_json_from_html( $html );
 		if ( !empty($json_array) ) {
-			
-			// --- Sanitize JSON recursively, ensuring proper handling of numbers and booleans.
+
+			// 1. Sanitize JSON recursively (booleans and numbers)
     		$json_array = $this->sanitize_json_recursively( $json_array );
 			
-			// Force PHP to use a cleaner serialization precision for floats to correct for long fractions.
+			// 2. --- Automatically create About Connections ---
+			if ( get_option( 'mdtj_auto_link_entities' ) ) {
+			    $json_array = $this->auto_link_schema_entities( $json_array, $url );
+			}
+
+			// 3. Force PHP to use a cleaner serialization precision
 			ini_set( 'serialize_precision', -1 );
     
-			// 1. Generate the string with the safe Unicode and Quote flags
+			// 4. Generate the string with the safe Unicode and Quote flags
 			$json_string = wp_json_encode( $json_array, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT );
 			$json_string = $this->fix_json_floats( $json_string ); // FIX JSON FLOATS
 			
-			// 2. CRITICAL: Wrap the string in wp_slash() before saving to post meta
+			// 5. Wrap the string in wp_slash() before saving to post meta
 			update_post_meta( $post_id, '_mdtj_json_ld', wp_slash( $json_string ) );
 			
-			// 3. Update the preview generator for consistency
+			// 6. Update the preview generator for consistency
 			$pretty_json = wp_json_encode( $json_array, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
 			$pretty_json = $this->fix_json_floats( $pretty_json ); // FIX THE AJAX PREVIEW
 			
@@ -272,6 +269,7 @@ class Microdata_To_JSON_LD_Converter {
 		register_setting( 'mdtj_options_group', 'mdtj_create_json', 'boolval' ); 
 		register_setting( 'mdtj_options_group', 'mdtj_remove_microdata', 'boolval' ); 
 		register_setting( 'mdtj_options_group', 'mdtj_regenerate_on_update', 'boolval' );
+		register_setting( 'mdtj_options_group', 'mdtj_auto_link_entities', 'boolval' );
 		
 		// General Settings
 		add_settings_section('mdtj_general_section', null, null, 'mdtj_general_settings');
@@ -282,6 +280,12 @@ class Microdata_To_JSON_LD_Converter {
 			'warning'     => __( 'Enabling this may conflict with server-side caching systems (e.g., Varnish). If you use a managed host with advanced caching, please test this feature carefully.', 'microdata-to-json-ld-converter' )
 		]);
 		add_settings_field('mdtj_regenerate_on_update', __( 'Keep JSON-LD up to date', 'microdata-to-json-ld-converter' ), array( $this, 'render_toggle_field' ), 'mdtj_general_settings', 'mdtj_general_section', [ 'option_name' => 'mdtj_regenerate_on_update', 'desc' => __( 'When enabled, the JSON-LD will be automatically regenerated every time a post is saved/updated. <strong>Warning:</strong> This will overwrite any manual edits in the meta box.', 'microdata-to-json-ld-converter' ) ]);
+
+		// --- Link Entries ---
+		add_settings_field('mdtj_auto_link_entities', __( 'Auto-Link Schema Entities', 'microdata-to-json-ld-converter' ), array( $this, 'render_toggle_field' ), 'mdtj_general_settings', 'mdtj_general_section', [ 
+		    'option_name' => 'mdtj_auto_link_entities', 
+		    'desc'        => __( 'When enabled, the plugin will automatically find standalone entities on the page (like Local Businesses, Campgrounds, or Parks) and link them to the main Article using the <code>about</code> property to create a unified Knowledge Graph.', 'microdata-to-json-ld-converter' ) 
+		]);
 		
 		// Bulk Rebuild Settings
 		add_settings_section('mdtj_bulk_rebuild_section', __( 'Bulk Rebuild Tools', 'microdata-to-json-ld-converter' ), array($this, 'render_bulk_rebuild_section_text'), 'mdtj_bulk_rebuild_settings');
@@ -778,6 +782,62 @@ class Microdata_To_JSON_LD_Converter {
 	    return preg_replace_callback( '/([:,\[]\s*)(-?\d+\.\d{5,})/', function( $matches ) {
 	        return $matches[1] . (string) round( (float) $matches[2], 5 );
 	    }, $json_string );
+	}
+
+	/**
+	 * Automatically links Places/Campgrounds/LocalBusinesses to the main Article's "about" property.
+	 * Also dynamically assigns unique @id attributes to these entities so you don't have to edit posts manually.
+	 */
+	/**
+	 * Automatically links Places/Campgrounds/LocalBusinesses to the main Article's "about" property.
+	 * Also dynamically assigns unique @id attributes to these entities so you don't have to edit posts manually.
+	 */
+	private function auto_link_schema_entities( $graph, $post_url ) {
+	    if ( ! isset( $graph['@graph'] ) ) {
+	        return $graph;
+	    }
+
+	    $items = $graph['@graph'];
+	    $article_index = -1;
+	    $about_entities = array();
+	    $type_counts = array(); // NEW: Tracks the count of each specific schema type
+	    
+	    foreach ( $items as $index => $item ) {
+	        if ( isset( $item['@type'] ) ) {
+	            $types = (array) $item['@type'];
+	            
+	            if ( in_array( 'Article', $types ) || in_array( 'NewsArticle', $types ) || in_array( 'BlogPosting', $types ) ) {
+	                $article_index = $index;
+	            }
+	            
+	            $target_types = array( 'Campground', 'LocalBusiness', 'TouristAttraction', 'Place', 'Park', 'Landform', 'Waterfall', 'Mountain', 'BodyOfWater', 'CivicStructure', 'LandmarksOrHistoricalBuildings', 'Event', 'Product', 'Organization' );
+	            if ( count( array_intersect( $types, $target_types ) ) > 0 ) {
+	                
+	                $primary_type = $types[0];
+	                
+	                // Initialize or increment the counter for this specific type
+	                if ( ! isset( $type_counts[ $primary_type ] ) ) {
+	                    $type_counts[ $primary_type ] = 1;
+	                } else {
+	                    $type_counts[ $primary_type ]++;
+	                }
+	                
+	                // Assign the ID using the type-specific counter
+	                if ( ! isset( $item['@id'] ) ) {
+	                    $items[$index]['@id'] = $post_url . '#' . strtolower( $primary_type ) . '-' . $type_counts[ $primary_type ];
+	                }
+	                
+	                $about_entities[] = array( '@id' => $items[$index]['@id'] );
+	            }
+	        }
+	    }
+
+	    if ( $article_index !== -1 && ! empty( $about_entities ) ) {
+	        $items[$article_index]['about'] = ( count( $about_entities ) === 1 ) ? $about_entities[0] : $about_entities;
+	    }
+
+	    $graph['@graph'] = $items;
+	    return $graph;
 	}
 
 	// --- SCHEDULER ---
