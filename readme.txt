@@ -3,7 +3,7 @@ Contributors: sethsm
 Tags: schema.org, Microdata, json-ld, seo, structured data
 Requires at least: 5.5
 Tested up to: 6.9
-Stable tag: 1.8.3
+Stable tag: 1.9
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -33,8 +33,9 @@ The **Microdata to JSON-LD Converter** solves this exact problem. This plugin se
 * **Bulk Rebuild Tool:** Process your entire site at once with a batch-processing tool that works through all your posts and pages.
 * **"Set It and Forget It" Mode:** Enable the "Keep JSON-LD up to date" option to ensure your structured data remains current.
 * **Clean & Modern UI:** A simple, intuitive settings page with toggle switches and tabs makes configuration a breeze.
-* **Homepage WebSite Schema:**  Automatically generates WebSite JSON-LD for your homepage, complete with a Sitelinks Search Box to improve your site's search presence.
-* **Dynamic Archive Schema:**  Automatically constructs lightweight CollectionPage and ItemList JSON-LD schema for Category and Tag pages, matching Google's exact specifications for list data without slowing down your server.
+* **Homepage WebSite Schema:** Automatically generates WebSite JSON-LD for your homepage, complete with a Sitelinks Search Box to improve your site's search presence.
+* **Dynamic Archive Schema:** Automatically constructs lightweight CollectionPage and ItemList JSON-LD schema for Category and Tag pages, matching Google's exact specifications for list data without slowing down your server.
+* **Knowledge Graph Auto-Linking:** Automatically identifies standalone entities (like Local Businesses) and links them to your main Article schema using dynamic `@id` references for a unified data graph.
 
 This plugin offers a seamless migration path to modernize your site's SEO and structured data implementation, eliminating the need to edit your content, plugins, or theme files.
 
@@ -76,24 +77,18 @@ The plugin automatically detects major SEO plugins (like Yoast, AIOSEO, and Rank
     `
     add_filter( 'mdtj_output_website_schema', '__return_false' );
     `
-= How is this plugin connected to the Microdata Refinement Department at LUMON?  =
+
+= How is this plugin connected to the Microdata Refinement Department at LUMON? =
 
 This plugin bears no relation whatsoever to LUMON or the MDR Department on the Severed Floor. The "Microdata" processed by this plugin is a structured data markup outlined by schema.org, which has fallen out of favor and has largely been replaced by the JSON-LD format (hence, why this converter exists).
 
 = What is the recommended implementation of this plugin? =
 
 Use the Microdata to JSON-LD Converter in 5 easy steps.
-
 1) Open the post editor, scroll down to the box titled "Schema.org JSON-LD." Verify that the created JSON-LD matches your existing schema.org content.
-
 2) After you have reviewed the "Schema.org JSON-LD" meta boxes on multiple posts and pages, use the Bulk Rebuild Tools to create JSON-LD meta for each post and page on your website. This build process will take several minutes for larger sites.
-
 3) Within the General Settings of the Microdata to JSON-LD Settings, toggle on "Enable JSON-LD Output." Doing this will add the JSON-LD to the head element of your webpages. The content within the "Schema.org JSON-LD" meta boxes is now being added to your published posts and pages.
-
-4) Within the General Settings of the Microdata to JSON-LD Settings, toggle on "Remove Inline Microdata from HTML." Doing this will strip the Microdata from the HTML output of your webpages. Although this plugin removes the inline Microdata attributes from the final public-facing HTML, it will not affect your backend theme files, plugins, and content where the Microdata markups originate.
-
-Note: To ensure that the inline Microdata does not serve as a duplicate of the new JSON-LD, both "Enable JSON-LD Output" and "Remove Inline Microdata from HTML" should be enabled in unison. 
-
+4) Within the General Settings of the Microdata to JSON-LD Settings, toggle on "Remove Inline Microdata from HTML." Doing this will strip the Microdata from the HTML output of your webpages. Although this plugin removes the inline Microdata attributes from the final public-facing HTML, it will not affect your backend theme files, plugins, and content where the Microdata markups originate. Note: To ensure that the inline Microdata does not serve as a duplicate of the new JSON-LD, both "Enable JSON-LD Output" and "Remove Inline Microdata from HTML" should be enabled in unison.
 5) To keep your JSON-LD updated going forward, toggle the option "keep JSON-LD up to date." This will ensure that your post's JSON-LD information is updated when you make changes to your posts and pages. If you have, or plan to, make manual edits within the JSON-LD meta boxes, keep this option turned off. However, in most cases, it will be helpful to automate keeping the JSON-LD up to date.
 
 == Screenshots ==
@@ -105,11 +100,16 @@ Note: To ensure that the inline Microdata does not serve as a duplicate of the n
 
 == Changelog ==
 
+= 1.9 =
+* **NEW:** Intelligent Knowledge Graph Auto-Linking. The plugin now automatically identifies standalone entities on the page (like Local Businesses and Campgrounds) and seamlessly links them to the main Article using the schema 'about' property and unique dynamically generated '@id' attributes.
+* **NEW:** Added a settings toggle in the dashboard to enable or disable the "Auto-Link Schema Entities" feature, providing granular control over Knowledge Graph construction.
+* **FIX:** Resolves an issue where floating-point numbers rendered with excessively long decimal tails in the JSON-LD output.
+
 = 1.8.3 =
 * **IMPROVEMENT:** Enhanced type-casting for Schema properties. Numbers and booleans (e.g., true/false) extracted from Microdata are now output as native JSON data types rather than strings, ensuring strict compliance with Schema.org standards and with rich results testing tools.
 
 = 1.8.2 =
-* **FIX:** Improved cleanup of malformed (and unmatched) `<p>` and `<div>` tags that may be created by wpautop surrounding removed microdata. 
+* **FIX:** Improved cleanup of malformed (and unmatched) `<p>` and `<div>` tags that may be created by wpautop surrounding removed microdata.
 * **IMPROVEMENT:** Cleaner HTML output by removing any empty `<span></span>` left behind by microdata removal.
 
 = 1.8.1 =
@@ -126,7 +126,7 @@ Note: To ensure that the inline Microdata does not serve as a duplicate of the n
 * **FIX:** Updated regex to include 'itemid' for removal, producing cleaner HTML and satisfying W3C validation requirements
 
 = 1.7 =
-**ENHANCEMENT:** Expanded content attribute support to all HTML tags. Machine-readable data (e.g., content="2025-11-30") now correctly takes precedence over human-readable text on <span> and <div> elements.
+* **ENHANCEMENT:** Expanded content attribute support to all HTML tags. Machine-readable data (e.g., content="2025-11-30") now correctly takes precedence over human-readable text on <span> and <div> elements.
 
 = 1.6.6 =
 * **SECURITY:** Improved Input handling and enhanced protection against parameter manipulation attacks.
@@ -137,7 +137,7 @@ Note: To ensure that the inline Microdata does not serve as a duplicate of the n
 * **SECURITY:** In the JSON Validator, implemented sprintf() for safer use of escaped variables and improved security against any potential XSS in dynamic messages.
 
 = 1.6.5 = 
-* **IMPROVEMENT:** Replaced deprecated mb_convert_encoding for handling character sets for HTML parsing. 
+* **IMPROVEMENT:** Replaced deprecated mb_convert_encoding for handling character sets for HTML parsing.
 
 = 1.6.4 = 
 * **NEW:** Added handling of the "itemid" microdata attribute to convert to "@id" schema
@@ -231,6 +231,9 @@ Note: To ensure that the inline Microdata does not serve as a duplicate of the n
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.9 =
+This version introduces automated Knowledge Graph semantic linking.
 
 = 1.4.1 =
 This version includes UI text improvements for better clarity on the settings page.
