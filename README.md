@@ -7,7 +7,7 @@ A WordPress plugin to convert existing Schema.org Microdata into the preferred J
 * **Tags:** schema.org, Microdata, json-ld, seo, structured data
 * **Requires at least:** 5.5
 * **Tested up to:** 6.9
-* **Stable tag:** 1.8.2
+* **Stable tag:** 1.9
 * **Requires PHP:** 7.2
 * **License:** GPLv2 or later
 * **License URI:** https://www.gnu.org/licenses/gpl-2.0.html
@@ -39,6 +39,8 @@ The **Microdata to JSON-LD Converter** solves this exact problem. This plugin se
 * **Clean & Modern UI:** A simple, intuitive settings page with toggle switches and tabs makes configuration a breeze.
 * **Homepage WebSite Schema:**  Automatically generates WebSite JSON-LD for your homepage, complete with a Sitelinks Search Box to improve your site's search presence.
 * **Dynamic Archive Schema:**  Automatically constructs lightweight CollectionPage and ItemList JSON-LD schema for Category and Tag pages, matching Google's exact specifications for list data without slowing down your server.
+* **Knowledge Graph Auto-Linking:** Automatically identifies standalone entities (like Local Businesses) and links them to your main Article schema using dynamic `@id` references for a unified data graph.
+
 
 This plugin offers a seamless migration path for modernizing your site’s SEO and structured data implementation, eliminating the need to edit your content, plugins, and theme files.
 
@@ -133,9 +135,13 @@ The meta box’s validation results after clicking the "Validate" button.
 
 ## Changelog
 
+### 1.9
+* **NEW:** Intelligent Knowledge Graph Auto-Linking. The plugin now automatically identifies standalone entities on the page (like Local Businesses and Campgrounds) and seamlessly links them to the main Article using the schema 'about' property and unique dynamically generated '@id' attributes.
+* **NEW:** Added a settings toggle in the dashboard to enable or disable the "Auto-Link Schema Entities" feature, providing granular control over Knowledge Graph construction.
+* **FIX:** Resolves an issue where floating-point numbers rendered with excessively long decimal tails in the JSON-LD output.
+
 ### 1.8.3
 * **IMPROVEMENT:** Enhanced type-casting for Schema properties. Numbers and booleans (e.g., true/false) extracted from Microdata are now output as native JSON data types rather than strings, ensuring strict compliance with Schema.org standards and with rich results testing tools.
-
 
 ### 1.8.2
 * **FIX:** Improved cleanup of malformed (and unmatched) `<p>` and `<div>` tags that may be created by wpautop surrounding removed microdata. 
@@ -262,6 +268,10 @@ The meta box’s validation results after clicking the "Validate" button.
 ---
 
 ## Upgrade Notice
+
+### 1.9
+This version introduces automated Knowledge Graph semantic linking.
+
 
 ### 1.4.1
 This version includes UI text improvements for better clarity on the settings page.
