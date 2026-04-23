@@ -103,7 +103,7 @@ Use the Microdata to JSON-LD Converter in 5 easy steps.
 = 1.9 =
 * **NEW:** Intelligent Knowledge Graph Auto-Linking. The plugin now automatically identifies standalone entities on the page (like Local Businesses and Campgrounds) and seamlessly links them to the main Article using the schema 'about' property and unique dynamically generated '@id' attributes.
 * **NEW:** Added a settings toggle in the dashboard to enable or disable the "Auto-Link Schema Entities" feature, providing granular control over Knowledge Graph construction.
-* **FIX:** Resolves an issue where floating-point numbers rendered with excessively long decimal tails in the JSON-LD output.
+* **FIX:** Resolves an issue where floating-point numbers could render with excessively long decimal tails in the JSON-LD output.
 
 = 1.8.3 =
 * **IMPROVEMENT:** Enhanced type-casting for Schema properties. Numbers and booleans (e.g., true/false) extracted from Microdata are now output as native JSON data types rather than strings, ensuring strict compliance with Schema.org standards and with rich results testing tools.
