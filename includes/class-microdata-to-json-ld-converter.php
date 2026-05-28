@@ -101,18 +101,45 @@ class Microdata_To_JSON_LD_Converter {
 			}
 		}
 	}
-
+	
+	// Updated to display json for drafts.
 	private function generate_for_post($post_id, $send_json_response = false) {
-		$url = get_permalink($post_id);
+		$post = get_post($post_id);
+		
+		// 1. Get the correct URL based on post status
+		if ( in_array( $post->post_status, array( 'draft', 'pending', 'auto-draft' ) ) ) {
+			// Gets the authenticated preview URL for unpublished posts
+			$url = get_preview_post_link( $post_id );
+		} else {
+			$url = get_permalink( $post_id );
+		}
+
 		if ( !$url ) {
-			$result = array('success' => false, 'message' => 'Could not get permalink.');
+			$result = array('success' => false, 'message' => 'Could not get permalink or preview link.');
 			if ($send_json_response) wp_send_json_error( array( 'message' => $result['message'] ) );
 			return $result;
 		}
 
 		$fetch_url = add_query_arg('mdtj_preview', 'true', $url);
 
-		$response = wp_remote_get($fetch_url, array('sslverify' => false, 'timeout' => 30));
+		// 2. Prepare request arguments, forwarding cookies for authentication
+		$args = array(
+			'sslverify' => false, 
+			'timeout'   => 30
+		);
+
+		$cookies = array();
+		foreach ( $_COOKIE as $name => $value ) {
+			$cookies[] = new WP_Http_Cookie( array( 'name' => $name, 'value' => $value ) );
+		}
+		
+		if ( ! empty( $cookies ) ) {
+			$args['cookies'] = $cookies;
+		}
+
+		// Fetch the page as the authenticated user
+		$response = wp_remote_get($fetch_url, $args);
+		
 		if( is_wp_error( $response ) ) {
 			$result = array('success' => false, 'message' => 'Failed to fetch page: ' . $response->get_error_message());
 			if ($send_json_response) wp_send_json_error( array( 'message' => $result['message'] ) );
@@ -130,13 +157,13 @@ class Microdata_To_JSON_LD_Converter {
 		if ( !empty($json_array) ) {
 
 			// 1. Sanitize JSON recursively (booleans and numbers)
-    		$json_array = $this->sanitize_json_recursively( $json_array );
+			$json_array = $this->sanitize_json_recursively( $json_array );
 			
-			// 2. --- Automatically create About Connections ---
+			// 2. Automatically create About Connections
 			if ( get_option( 'mdtj_auto_link_entities' ) ) {
-			    $json_array = $this->auto_link_schema_entities( $json_array, $url );
+				$json_array = $this->auto_link_schema_entities( $json_array, $url );
 			}
-    
+ 
 			// 3. Generate the string with the safe Unicode and Quote flags
 			$json_string = wp_json_encode( $json_array, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT );
 			$json_string = $this->fix_json_floats( $json_string ); // FIX JSON FLOATS
