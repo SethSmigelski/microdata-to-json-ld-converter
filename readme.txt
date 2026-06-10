@@ -2,8 +2,8 @@
 Contributors: sethsm
 Tags: schema.org, Microdata, json-ld, seo, structured data
 Requires at least: 5.5
-Tested up to: 6.9
-Stable tag: 1.9
+Tested up to: 7.0
+Stable tag: 2.0
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -99,6 +99,10 @@ Use the Microdata to JSON-LD Converter in 5 easy steps.
 4.  The meta box's validation results after clicking the "Validate" button.
 
 == Changelog ==
+
+= 2.0 =
+* **IMPROVEMENT:** Added JSON-LD support for drafts to populate the JSON-LD meta box before posts go live.
+* **DEV:** Tested Up To WordPress 7.0.
 
 = 1.9 =
 * **NEW:** Intelligent Knowledge Graph Auto-Linking. The plugin now automatically identifies standalone entities on the page (like Local Businesses and Campgrounds) and seamlessly links them to the main Article using the schema 'about' property and unique dynamically generated '@id' attributes.
